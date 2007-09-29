@@ -9,7 +9,9 @@ Source:
 
   git clone http://git.debian.org/git/libkdtree/libkdtree.git
 
-License: Artistic Licence
+License: Artistic License 2.0
+
+Homepage: http://libkdtree.alioth.debian.org
 
 This library is still undocumented. If you would like to document it, please
 feel free (but use Doxygen).
