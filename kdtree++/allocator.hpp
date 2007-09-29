@@ -1,7 +1,7 @@
 /** \file
  * Defines the allocator interface as used by the KDTree class.
  *
- * \author Martin F. Krafft <madduck@madduck.net>
+ * \author Martin F. Krafft <libkdtree@pobox.madduck.net>
  */
 
 #ifndef INCLUDE_KDTREE_ALLOCATOR_HPP
@@ -69,7 +69,7 @@ namespace KDTree
 /* COPYRIGHT --
  *
  * This file is part of libkdtree++, a C++ template KD-Tree sorting container.
- * libkdtree++ is (c) 2004-2007 Martin F. Krafft <madduck@madduck.net>
+ * libkdtree++ is (c) 2004-2007 Martin F. Krafft <libkdtree@pobox.madduck.net>
  * and distributed under the terms of the Artistic License 2.0.
  * See the ./COPYING file in the source tree root for more information.
  *
