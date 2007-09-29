@@ -2,8 +2,6 @@
  * Defines the interface for the KDTree class.
  *
  * \author Martin F. Krafft <madduck@madduck.net>
- * \date $Date: 2004/11/26 06:02:57 $
- * \version $Revision: 1.11 $
  */
 
 #ifndef INCLUDE_KDTREE_KDTREE_HPP

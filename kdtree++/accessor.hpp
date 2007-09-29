@@ -2,8 +2,6 @@
  * Defines the interface for the Accessor class.
  *
  * \author Martin F. Krafft <madduck@madduck.net>
- * \date $Date: 2004/11/26 06:02:56 $
- * \version $Revision: 1.6 $
  */
 
 #ifndef INCLUDE_KDTREE_ACCESSOR_HPP

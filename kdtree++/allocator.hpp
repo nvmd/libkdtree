@@ -2,8 +2,6 @@
  * Defines the allocator interface as used by the KDTree class.
  *
  * \author Martin F. Krafft <madduck@madduck.net>
- * \date $Date: 2004/11/15 17:40:32 $
- * \version $Revision: 1.6 $
  */
 
 #ifndef INCLUDE_KDTREE_ALLOCATOR_HPP

@@ -2,8 +2,6 @@
  * Defines interfaces for iterators as used by the KDTree class.
  *
  * \author Martin F. Krafft <madduck@madduck.net>
- * \date $Date: 2004/11/15 17:40:32 $
- * \version $Revision: 1.4 $
  */
 
 #ifndef INCLUDE_KDTREE_ITERATOR_HPP

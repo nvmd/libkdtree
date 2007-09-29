@@ -51,9 +51,6 @@ libkdtree++ ChangeLog
 
 	- Initial release.
 
-Martin F. Krafft <madduck@madduck.net>
-Revision: $Id: ChangeLog,v 1.10 2004/11/26 06:05:22 pharris Exp $
-
 COPYRIGHT --
   libkdtree++ is (c) 2004-2007 Martin F. Krafft <madduck@madduck.net>
   and distributed under the terms of the Artistic License 2.0.

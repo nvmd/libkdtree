@@ -2,8 +2,6 @@
  * Defines the interface of the _Region class.
  *
  * \author Martin F. Krafft <madduck@madduck.net>
- * \date $Date: 2004/11/26 06:02:57 $
- * \version $Revision: 1.6 $
  */
 
 #ifndef INCLUDE_KDTREE_REGION_HPP
