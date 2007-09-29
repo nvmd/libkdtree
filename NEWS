@@ -1,4 +1,11 @@
 libkdtree++ NEWS
 ================
 
+29 Sep 2007:
+  Sylvain Bougere spent some time cleaning up the code and build
+  infrastructure of the code from Sourceforge, and I imported the results of
+  his work to a git repository on git.debian.org today.
+
+  http://git.debian.org/?p=libkdtree/libkdtree.git;a=summary
+
 Martin F. Krafft <krafft@ailab.ch>
