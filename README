@@ -5,7 +5,7 @@ libkdtree++ is (c) 2004 Martin F. Krafft <krafft@ailab.ch>
 and distributed under the terms of the Artistic Licence.
 See the file LICENSE in the source distribution for more information.
 
-Please send bugreports to <krafft@ailab.ch>.
+Please send bugreports to <libkdtree-devel@lists.alioth.debian.org>.
 
 Introduction
 ------------
@@ -34,7 +34,7 @@ Note that the library is not (yet) complete and it's not thoroughly tested.
 However, given the effort and grief I went through in writing it, I would
 like to make it available to folks, get people to test it, and hopefully have
 some peeps submit improvements. If you have any suggestions, please write to
-me at krafft@ailab.ch.
+libkdtree-devel@lists.alioth.debian.org .
 
 It's not yet documented, although the usage should be fairly straight
 forward. I am hoping to find someone else to document it as I suck at
