@@ -5,10 +5,9 @@
 Author: Martin F. Krafft <krafft@ailab.ch>
 
 Source:
-  http://cvs.ailab.ch/cgi-bin/viewcvs.cgi/libkdtree%2B%2B/
+  http://git.debian.org/?p=libkdtree/libkdtree.git;a=summary
 
-  cvs -d :pserver:anoncvs@cvs.ailab.ch login   (empty password)<br>
-  cvs -z3 -d :pserver:anoncvs@cvs.ailab.ch co libikdtree++
+  git clone http://git.debian.org/git/libkdtree/libkdtree.git
 
 License: Artistic Licence
 
