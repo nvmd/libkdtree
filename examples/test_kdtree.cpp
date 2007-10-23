@@ -9,7 +9,7 @@ struct triplet {
   typedef int value_type;
 
   inline value_type operator[](size_t const N) const { return d[N]; }
-  
+
   value_type d[3];
 };
 
@@ -32,16 +32,16 @@ int main()
 
   tree_type t(std::ptr_fun(tac));
 
-  triplet c0 = {5, 4, 0}; t.insert(c0);
-  triplet c1 = {4, 2, 1}; t.insert(c1);
-  triplet c2 = {7, 6, 9}; t.insert(c2);
-  triplet c3 = {2, 2, 1}; t.insert(c3);
-  triplet c4 = {8, 0, 5}; t.insert(c4);
-  triplet c5 = {5, 7, 0}; t.insert(c5);
-  triplet c6 = {3, 3, 8}; t.insert(c6);
-  triplet c7 = {9, 7, 3}; t.insert(c7);
-  triplet c8 = {2, 2, 6}; t.insert(c8);
-  triplet c9 = {2, 0, 6}; t.insert(c9);
+  triplet c0 = { {5, 4, 0} }; t.insert(c0);
+  triplet c1 = { {4, 2, 1} }; t.insert(c1);
+  triplet c2 = { {7, 6, 9} }; t.insert(c2);
+  triplet c3 = { {2, 2, 1} }; t.insert(c3);
+  triplet c4 = { {8, 0, 5} }; t.insert(c4);
+  triplet c5 = { {5, 7, 0} }; t.insert(c5);
+  triplet c6 = { {3, 3, 8} }; t.insert(c6);
+  triplet c7 = { {9, 7, 3} }; t.insert(c7);
+  triplet c8 = { {2, 2, 6} }; t.insert(c8);
+  triplet c9 = { {2, 0, 6} }; t.insert(c9);
 
   std::cout << t << std::endl;
 
@@ -51,27 +51,29 @@ int main()
   t.erase(c5);
 
   t.optimise();
-  
+
   std::cout << std::endl << t << std::endl;
 
-  triplet s = {5, 4, 3};
+  triplet s = { {5, 4, 3} };
   std::vector<triplet> v;
   unsigned int const RANGE = 3;
-  std::cout << "counted " << t.count_within_range(s, RANGE) 
-    << " nodes within range " << RANGE << " of " << s << ".\n";
+
+  std::cout << "counted " << t.count_within_range(s, RANGE)
+	    << " nodes within range " << RANGE << " of " << s << ".\n";
   t.find_within_range(s, RANGE, std::back_inserter(v));
+
   std::cout << "found   " << v.size() << " nodes within range " << RANGE
-    << " of " << s << ".\n";
+	    << " of " << s << ":\n";
   std::vector<triplet>::const_iterator ci = v.begin();
   for (; ci != v.end(); ++ci)
-    std::cout << *ci << std::endl;
-  std::cout << std::endl;
-  
+    std::cout << *ci << " ";
+  std::cout << "\n" << std::endl;
+
   std::cout << "Nearest to " << s << ": " <<
      *t.find_nearest(s,std::numeric_limits<double>::max()).first << std::endl;
 
-  triplet s2 = {10, 10, 2};
-  std::cout << "Nearest to " << s2 << ": " << 
+  triplet s2 = { {10, 10, 2} };
+  std::cout << "Nearest to " << s2 << ": " <<
      *t.find_nearest(s2,std::numeric_limits<double>::max()).first << std::endl;
 
   std::cout << std::endl;

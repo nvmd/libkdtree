@@ -49,10 +49,10 @@ namespace KDTree
   class _Base_iterator
   {
   protected:
-    typedef _Node_base::_Base_ptr _Base_ptr;
-    _Base_ptr _M_node;
+    typedef _Node_base::_Base_const_ptr _Base_const_ptr;
+    _Base_const_ptr _M_node;
 
-    inline _Base_iterator(_Base_ptr const __N = NULL)
+    inline _Base_iterator(_Base_const_ptr const __N = NULL)
       : _M_node(__N) {}
     inline _Base_iterator(_Base_iterator const& __THAT)
       : _M_node(__THAT._M_node) {}
@@ -74,7 +74,7 @@ namespace KDTree
       }
       else
         {
-          _Base_ptr __p = _M_node->_M_parent;
+          _Base_const_ptr __p = _M_node->_M_parent;
           while (_M_node == __p->_M_right)
             {
               _M_node = __p;
@@ -92,14 +92,14 @@ namespace KDTree
         _M_node = _M_node->_M_right;
       else if (_M_node->_M_left)
         {
-          _Base_ptr __p = _M_node->_M_left;
+          _Base_const_ptr __p = _M_node->_M_left;
           _M_node = _M_node->_M_left;
           while (_M_node->_M_right) __p = __p->_M_right;
           _M_node = __p;
         }
       else
         {
-          _Base_ptr __p = _M_node->_M_parent;
+          _Base_const_ptr __p = _M_node->_M_parent;
           while (_M_node == __p->_M_left)
             {
               _M_node = __p;
@@ -123,13 +123,13 @@ namespace KDTree
       typedef _Iterator<_Val, _Val&, _Val*> iterator;
       typedef _Iterator<_Val, _Val const&, _Val const*> const_iterator;
       typedef _Iterator<_Val, _Ref, _Ptr> _Self;
-      typedef _Node<_Val>* _Link_type;
+      typedef _Node<_Val> const* _Link_const_type;
       typedef std::bidirectional_iterator_tag iterator_category;
       typedef ptrdiff_t difference_type;
 
       inline _Iterator()
         : _Base_iterator() {}
-      inline _Iterator(_Link_type const __N)
+      inline _Iterator(_Link_const_type const __N)
         : _Base_iterator(__N) {}
       inline _Iterator(iterator const& __THAT)
         : _Base_iterator(__THAT) {}
@@ -137,7 +137,7 @@ namespace KDTree
       reference
       operator*() const
       {
-        return _Link_type(_M_node)->_M_value;
+        return _Link_const_type(_M_node)->_M_value;
       }
       
       pointer

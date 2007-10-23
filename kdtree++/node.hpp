@@ -18,6 +18,7 @@ namespace KDTree
   struct _Node_base
   {
     typedef _Node_base* _Base_ptr;
+    typedef _Node_base const* _Base_const_ptr;
 
     _Base_ptr _M_parent;
     _Base_ptr _M_left;
@@ -63,25 +64,25 @@ namespace KDTree
     class _Node_compare
     {
     public:
-      typedef _Node<_Val>* _Link_type;
+      typedef _Node<_Val> const* _Link_const_type;
 
       _Node_compare(size_t const __DIM, _Acc const& acc ) : _M_DIM(__DIM), _M_acc(acc) {} 
 
       bool
-      operator()(_Link_type const& __A, _Link_type const& __B) const
+      operator()(_Link_const_type const& __A, _Link_const_type const& __B) const
       {
         return _M_cmp(_M_acc(__A->_M_value, _M_DIM),
                       _M_acc(__B->_M_value, _M_DIM));
       }
 
       bool
-      operator()(_Link_type const& __A, _Val const& __B) const
+      operator()(_Link_const_type const& __A, _Val const& __B) const
       {
         return _M_cmp(_M_acc(__A->_M_value, _M_DIM), _M_acc(__B, _M_DIM));
       }
 
       bool
-      operator()(_Val const& __A, _Link_type const& __B) const
+      operator()(_Val const& __A, _Link_const_type const& __B) const
       {
         return _M_cmp(_M_acc(__A, _M_DIM), _M_acc(__B->_M_value, _M_DIM));
       }

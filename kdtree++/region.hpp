@@ -52,8 +52,14 @@ namespace KDTree
       {
         for (size_t __i = 0; __i != __K; ++__i)
           {
-            if (_M_cmp(__THAT.first._M_low_bounds[__i] + __THAT.second, _M_low_bounds[__i])
-             || _M_cmp(_M_high_bounds[__i], __THAT.first._M_low_bounds[__i] - __THAT.second))
+             // does it fall outside the bounds? 
+             // ! low-tolerance <= x <= high+tolerance
+             // ! (low-tol <= x and x <= high+tol)
+             // !low-tol<=x or !x<=high+tol
+             // low-tol>x or x>high+tol
+             // x<low-tol or high+tol<x
+            if (_M_cmp(__THAT.first._M_low_bounds[__i], _M_low_bounds[__i] - __THAT.second)
+             || _M_cmp(_M_high_bounds[__i] + __THAT.second, __THAT.first._M_low_bounds[__i]))
               return false;
           }
         return true;
