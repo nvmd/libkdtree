@@ -1,6 +1,28 @@
 libkdtree++ ChangeLog
 =====================
 
+2007-10-24  Sylvain Bougerel (sylvain.bougerel.devel@gmail.com)
+
+	- Removal of all the warnings that are yield by the compiler when
+	using the following flags:
+		-Wall -pedantic -ansi
+	Do not hesitate to suggest any flags for additional code checking.
+
+	This release also feature numerous of enhancements by Paul Harris
+	(paulharris@computer.org):
+		- const kdtrees can be searched
+		- find_nearest_if() enforce validation of a predicate
+		- visit_within_range() walk the tree and calls
+		Visitor::operator() on template argument <Visitor> for
+		each node within the range
+	- find_exact() matches an kdtree::value_type by location and by
+	calling kdtree::value_type::operator==() (in case two different
+	items have the same location find_exact() will not return the
+	wrong item)
+	- erase_exact() is to erase() what find_exact() is to find()
+	- check_tree() and num_dist_calcs for debugging purpose plus
+	additional improvements on erase and region intersection
+
 2004-11-26  Paul Harris (paulharris@computer.org)
 
 	- New feature: find_nearest()
@@ -51,11 +73,13 @@ libkdtree++ ChangeLog
 
 	- Initial release.
 
-COPYRIGHT --
-  libkdtree++ is (c) 2004-2007 Martin F. Krafft <libkdtree@pobox.madduck.net>
-  and distributed under the terms of the Artistic License 2.0.
-  See the ./COPYING file in the source tree root for more information.
 
-  THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
-  WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES
-  OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ COPYRIGHT --
+ libkdtree++ is (c) 2004-2007 Martin F. Krafft <libkdtree@pobox.madduck.net> and
+ Sylvain Bougerel <sylvain.bougerel.devel@gmail.com> and distributed under the
+ terms of the Artistic License 2.0. See the ./COPYING file in the source tree
+ root for more information.
+	
+ THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES,
+ INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY AND
+ FITNESS FOR A PARTICULAR PURPOSE.

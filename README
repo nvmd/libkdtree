@@ -41,8 +41,8 @@ forward. I am hoping to find someone else to document it as I suck at
 documentation and as the author, it's exceptionally difficult to stay
 didactically correct.
 
-Credits
--------
+Credits (Martin F. Kraft)
+-------------------------
 
 While the library was written all by myself, it would not have been possible
 without the help of a number of people. Foremost, I would like to thank the
@@ -59,6 +59,16 @@ implementation of red-black trees (stl_tree.h).
 I also have to thank the Debian project for providing an amazingly reliable
 and flexible developer station with their operating system. I am sorry for
 everyone who has to use something else.
+
+Installation
+------------
+
+As there is no need to compile any files, you can just:
+
+$ ./configure
+$ sudo make install
+
+Read the following to make use of the library.
 
 Usage
 -----

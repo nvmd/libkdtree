@@ -2,6 +2,8 @@ libkdtree++ TODO list
 =====================
 
 - DOCUMENTATION
+- automated unit testing
+- performance improvement
 - consistent use of throw () in function decl/defn.
 - keep tree balanced in insert() and erase().
 - erase(range)

@@ -5,7 +5,8 @@ aclocal
 autoheader
 automake --add-missing --no-force
 autoconf
-exec ./configure $@
+# To be run by the library users
+#exec ./configure $@
 
 # COPYRIGHT --
 #
