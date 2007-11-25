@@ -188,16 +188,13 @@ namespace KDTree
       // No mutable iterator at this stage
       typedef const_iterator iterator;
 
-//      typedef std::reverse_iterator<iterator> reverse_iterator;
-      // TODO: const_reverse_iterators are broken
-      // see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=244894
       typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
       typedef std::reverse_iterator<iterator> reverse_iterator;
 
       const_iterator begin() const { return const_iterator(_M_get_leftmost()); }
       const_iterator end() const { return const_iterator(_M_header); }
-      const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
-      const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+      const_reverse_iterator rbegin() const { return const_reverse_iterator(_M_get_rightmost()); }
+      const_reverse_iterator rend() const { return const_reverse_iterator(_M_header); }
 
       // iterator begin() { return iterator(_M_get_leftmost()); }
       // iterator end() { return iterator(_M_header); }

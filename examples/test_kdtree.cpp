@@ -54,11 +54,29 @@ int main()
 
   std::cout << std::endl << t << std::endl;
 
+  int i=0;
+  for (tree_type::const_iterator iter=t.begin(); iter!=t.end(); ++iter, ++i);
+  std::cout << "iterator walked through " << i << " nodes in total" << std::endl;
+  if (i!=6)
+    {
+      std::cerr << "Error: does not tally with the expected number of nodes (6)" << std::endl;
+      return 1;
+    }
+  i=0;
+  for (tree_type::const_reverse_iterator iter=t.rbegin(); iter!=t.rend(); ++iter, ++i);
+  std::cout << "reverse_iterator walked through " << i << " nodes in total" << std::endl;
+  if (i!=6)
+    {
+      std::cerr << "Error: does not tally with the expected number of nodes (6)" << std::endl;
+      return 1;
+    }
+
   triplet s = { {5, 4, 3} };
   std::vector<triplet> v;
   unsigned int const RANGE = 3;
 
-  std::cout << "counted " << t.count_within_range(s, RANGE)
+  size_t count = t.count_within_range(s, RANGE);
+  std::cout << "counted " << count
 	    << " nodes within range " << RANGE << " of " << s << ".\n";
   t.find_within_range(s, RANGE, std::back_inserter(v));
 

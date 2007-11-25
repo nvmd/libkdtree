@@ -62,15 +62,8 @@ namespace KDTree
     {
       if (_M_node->_M_right)
       {
-        if (_M_node == _M_node->_M_right->_M_right)
-          {
-            _M_node = _M_node->_M_right;
-          }
-        else
-          {
             _M_node = _M_node->_M_right;
             while (_M_node->_M_left) _M_node = _M_node->_M_left;
-          }
       }
       else
         {
@@ -88,15 +81,11 @@ namespace KDTree
     inline void
     _M_decrement()
     {
-      if (_M_node->_M_parent->_M_parent == _M_node)
-        _M_node = _M_node->_M_right;
-      else if (_M_node->_M_left)
-        {
-          _Base_const_ptr __p = _M_node->_M_left;
-          _M_node = _M_node->_M_left;
-          while (_M_node->_M_right) __p = __p->_M_right;
-          _M_node = __p;
-        }
+      if (_M_node->_M_left)
+      {
+            _M_node = _M_node->_M_left;
+            while (_M_node->_M_right) _M_node = _M_node->_M_right;
+      }
       else
         {
           _Base_const_ptr __p = _M_node->_M_parent;
@@ -105,7 +94,8 @@ namespace KDTree
               _M_node = __p;
               __p = _M_node->_M_parent;
             }
-          _M_node = __p;
+          if (_M_node->_M_left != __p)
+            _M_node = __p;
         }
     }
 
@@ -139,7 +129,7 @@ namespace KDTree
       {
         return _Link_const_type(_M_node)->_M_value;
       }
-      
+
       pointer
       operator->() const
       {
@@ -152,28 +142,28 @@ namespace KDTree
         _M_increment();
         return *this;
       }
-      
+
       _Self
       operator++(int)
-      { 
-        _Self ret = *this; 
-        _M_increment(); 
-        return ret; 
+      {
+        _Self ret = *this;
+        _M_increment();
+        return ret;
       }
-      
+
       _Self&
       operator--()
       {
         _M_decrement();
-        return *this; 
+        return *this;
       }
-      
+
       _Self
       operator--(int)
-      { 
-        _Self ret = *this; 
-        _M_decrement(); 
-        return ret; 
+      {
+        _Self ret = *this;
+        _M_decrement();
+        return ret;
       }
 
       friend bool
@@ -195,7 +185,7 @@ namespace KDTree
       friend bool
       operator!= <>(_Iterator<_Val, const _Val&, const _Val*> const&,
                     _Iterator<_Val, _Val&, _Val*> const&) throw ();
- 
+
       friend bool
       operator!= <>(_Iterator<_Val, _Val&, _Val*> const&,
                     _Iterator<_Val, const _Val&, const _Val*> const&) throw ();
