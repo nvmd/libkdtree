@@ -1,6 +1,10 @@
 libkdtree++ ChangeLog
 =====================
 
+2007-11-25 Sylvain Bougerel (sylvain.bougerel.devel@gmail.com)
+
+	- fixed the reverse_iterator. Now it can be used.
+
 2007-10-24  Sylvain Bougerel (sylvain.bougerel.devel@gmail.com)
 
 	- Removal of all the warnings that are yield by the compiler when
