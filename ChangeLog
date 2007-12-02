@@ -12,7 +12,8 @@ libkdtree++ ChangeLog
 	KDTree<__K, _Val, _Acc, _Dist, _Cmp, _Alloc>
 	So pay attention to the _Dist functor. The distance functor calculate
 	the squared difference between 2 elements returned by the accessor. You
-	might have to change your code to reflect the new definition!
+	might have to change your code to reflect the new definition, or it wont
+	compile if you have set custom accessor and comparison functors.
 
 	- The following functors are now accessible in the tree:
 		- the comparison functor, accessible by copy only
@@ -24,6 +25,9 @@ libkdtree++ ChangeLog
 	- find_exact has not be modified and retained the code of the former,
 	slower algorithm. I have to write some more code to do this. Pls wait a
 	little more.
+
+	- The file accessor.hpp was renamed as function.hpp for it now boast
+	more than just the KDTree accessor
 
 2007-11-25 Sylvain Bougerel (sylvain.bougerel.devel@gmail.com)
 
