@@ -48,6 +48,10 @@
 
 #include <vector>
 
+#ifdef KDTREE_CHECK_PERFORMANCE_COUNTERS
+#  include <map>
+#endif
+
 #ifdef KDTREE_DEFINE_OSTREAM_OPERATORS
 #  include <ostream>
 #  include <stack>
@@ -57,7 +61,7 @@
 #include <cstddef>
 #include <cassert>
 
-#include <kdtree++/accessor.hpp>
+#include <kdtree++/function.hpp>
 #include <kdtree++/allocator.hpp>
 #include <kdtree++/iterator.hpp>
 #include <kdtree++/node.hpp>
@@ -67,12 +71,14 @@ namespace KDTree
 {
 
 #ifdef KDTREE_CHECK_PERFORMANCE
-   size_t num_dist_calcs = 0;
+   unsigned long long num_dist_calcs = 0;
 #endif
 
 
   template <size_t const __K, typename _Val,
             typename _Acc = _Bracket_accessor<_Val>,
+	    typename _Dist = squared_difference<typename _Acc::result_type,
+						typename _Acc::result_type>,
             typename _Cmp = std::less<typename _Acc::result_type>,
             typename _Alloc = std::allocator<_Node<_Val> > >
     class KDTree : protected _Alloc_base<_Val, _Alloc>
@@ -100,21 +106,21 @@ namespace KDTree
       typedef value_type& reference;
       typedef value_type const& const_reference;
       typedef typename _Acc::result_type subvalue_type;
-      typedef subvalue_type distance_type;   // NEW TYPE - for returning distances
-      // I wanted to distinguish it from subvaluetype, for the future when/if we have
-      // types that need a fancy distance calculation.
-      // This is not complete yet, eg Region still uses subvalue_type for distance_type.
+      typedef typename _Dist::distance_type distance_type;
       typedef size_t size_type;
       typedef ptrdiff_t difference_type;
 
-      KDTree( _Acc const& acc = _Acc(), const allocator_type& __a = allocator_type()) throw ()
-        : _Base(__a), _M_header(_Base::_M_allocate_node()), _M_count(0), _M_acc(acc)
+      KDTree(_Acc const& __acc = _Acc(), _Dist const& __dist = _Dist(),
+	     _Cmp const& __cmp = _Cmp(), const allocator_type& __a = allocator_type()) throw ()
+        : _Base(__a), _M_header(_Base::_M_allocate_node()),
+	  _M_count(0), _M_acc(__acc), _M_cmp(__cmp), _M_dist(__dist)
       {
          _M_empty_initialise();
       }
 
       KDTree(const KDTree& __x) throw ()
-         : _Base(__x.get_allocator()), _M_header(_Base::_M_allocate_node()), _M_count(0), _M_acc(__x._M_acc)
+         : _Base(__x.get_allocator()), _M_header(_Base::_M_allocate_node()), _M_count(0),
+	   _M_acc(__x._M_acc), _M_cmp(__x._M_cmp), _M_dist(__x._M_dist)
       {
          _M_empty_initialise();
          this->insert(begin(), __x.begin(), __x.end());
@@ -123,8 +129,10 @@ namespace KDTree
 
       template<typename _InputIterator>
         KDTree(_InputIterator __first, _InputIterator __last,
-             _Acc const& acc = _Acc(), const allocator_type& __a = allocator_type()) throw ()
-        : _Base(__a), _M_header(_Base::_M_allocate_node()), _M_count(0), _M_acc(acc)
+	       _Acc const& acc = _Acc(), _Dist const& __dist = _Dist(),
+	       _Cmp const& __cmp = _Cmp(), const allocator_type& __a = allocator_type()) throw ()
+        : _Base(__a), _M_header(_Base::_M_allocate_node()), _M_count(0),
+	  _M_acc(acc), _M_cmp(__cmp), _M_dist(__dist)
       {
          _M_empty_initialise();
          this->insert(begin(), __first, __last);
@@ -183,11 +191,46 @@ namespace KDTree
         _M_count = 0;
       }
 
+      /*! \brief Comparator for the values in the KDTree.
+
+	The comparator shall not be modified, it could invalidate the tree.
+	\return a copy of the comparator used by the KDTree.
+       */
+      _Cmp
+      value_comp() const
+      { return _M_cmp; }
+
+      /*! \brief Accessor to the value's elements.
+
+	This accessor shall not be modified, it could invalidate the tree.
+	\return a copy of the accessor used by the KDTree.
+       */
+      _Acc
+      value_acc() const
+      { return _M_acc; }
+
+      /*! \brief Distance calculator between 2 value's element.
+
+	This functor can be modified. It's modification will only affect the
+	behavior of the find and find_nearest functions.
+	\return a reference to the distance calculator used by the KDTree.
+       */
+      const _Dist&
+      value_distance() const
+      { return _M_dist; }
+
+      _Dist&
+      value_distance()
+      { return _M_dist; }
+
       // typedef _Iterator<_Val, reference, pointer> iterator;
       typedef _Iterator<_Val, const_reference, const_pointer> const_iterator;
       // No mutable iterator at this stage
       typedef const_iterator iterator;
 
+//      typedef std::reverse_iterator<iterator> reverse_iterator;
+      // TODO: const_reverse_iterators are broken
+      // see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=244894
       typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
       typedef std::reverse_iterator<iterator> reverse_iterator;
 
@@ -329,7 +372,7 @@ namespace KDTree
         count_within_range(const_reference __V, subvalue_type const __R) const throw ()
         {
           if (!_M_get_root()) return 0;
-          _Region __region(_M_acc,__V,__R);
+          _Region __region(__V, __R, _M_acc, _M_cmp);
           return this->count_within_range(__region);
         }
 
@@ -348,7 +391,7 @@ namespace KDTree
         visit_within_range(SearchVal V, subvalue_type const R, Visitor visitor) const throw ()
         {
           if (!_M_get_root()) return visitor;
-          _Region region(_M_acc,V,R);
+          _Region region(V, R, _M_acc, _M_cmp);
           return this->visit_within_range(region, visitor);
         }
 
@@ -364,7 +407,11 @@ namespace KDTree
           return visitor;
         }
 
-
+      const_iterator
+      find_within_range_iterative(const_reference __a, const_reference __b)
+	{
+	  return const_iterator(begin());
+	}
 
       template <typename SearchVal, typename _OutputIterator>
         _OutputIterator
@@ -372,7 +419,7 @@ namespace KDTree
                           _OutputIterator __out) const throw ()
         {
           if (!_M_get_root()) return __out;
-          _Region __region(_M_acc,__V,__R);
+          _Region __region(__V, __R, _M_acc, _M_cmp);
           return this->find_within_range(__region, __out);
         }
 
@@ -390,70 +437,61 @@ namespace KDTree
           return __out;
         }
 
+      std::pair<const_iterator, distance_type>
+      find_nearest (const value_type& __val) const
+      {
+	if (_M_get_root())
+	  {
+	    std::pair<const _Node<_Val>*,
+	      std::pair<size_t, typename _Acc::result_type> >
+	      best = _S_node_nearest (__K, 0, __val,
+				      _M_get_root(), _M_header,
+				      _S_accumulate_node_distance
+				      (__K, _M_dist, _M_acc, _M_get_root(), __val),
+				      _M_cmp, _M_acc, _M_dist,
+				      always_true<_Val>());
+	    return std::pair<const_iterator, distance_type>
+	      (best.first, best.second.second);
+	  }
+	else
+	  return std::pair<const_iterator, distance_type>(end(), 0);
+      }
 
-      template <typename SearchVal>
-         std::pair<const_iterator,distance_type>
-        find_nearest(SearchVal __V, subvalue_type const __Max_R ) const throw ()
-        {
-          if (!_M_get_root())
-             return std::pair<const_iterator,distance_type>(this->end(),__Max_R);
-          _Region __region(_M_acc,__V);  // note: zero-area!
-          typename _Region::_CenterPt __pt(__region,__Max_R);
-          return this->find_nearest(__pt);
-        }
+      std::pair<const_iterator, distance_type>
+      find_nearest (const value_type& __val, const distance_type& __max) const
+      {
+	if (_M_get_root())
+	  {
+	    std::pair<const _Node<_Val>*,
+	      std::pair<size_t, typename _Acc::result_type> >
+	      best = _S_node_nearest (__K, 0, __val,
+				      _M_get_root(), _M_header, __max,
+				      _M_cmp, _M_acc, _M_dist,
+				      always_true<_Val>());
+	    return std::pair<const_iterator, distance_type>
+	      (best.first, best.second.second);
+	  }
+	else
+	  return std::pair<const_iterator, distance_type>(end(), 0);
+      }
 
-
-
-      template <typename SearchVal, class Predicate>
-         std::pair<const_iterator,distance_type>
-        find_nearest_if(SearchVal __V, subvalue_type const __Max_R, Predicate predicate ) const throw ()
-        {
-          if (!_M_get_root())
-             return std::pair<const_iterator,distance_type>(this->end(),__Max_R);
-          _Region __region(_M_acc,__V);  // note: zero-area!
-          typename _Region::_CenterPt __pt(__region,__Max_R);
-          return this->find_nearest_if(__pt,predicate);
-        }
-
-
-      std::pair<const_iterator,distance_type>
-        find_nearest( typename _Region::_CenterPt const& __CENTER ) const throw ()
-        {
-          if (_M_get_root())
-          {
-             // note: we set the initial 'bounds' to the exact point.
-             // they expand from there outwards.
-             _Region __bounds(__CENTER.first);
-             std::pair<const_iterator,distance_type> best = _M_find_nearest(_M_get_root(), __CENTER, __bounds, 0, always_true());
-             // ensure we return end() if we didn't find it
-             // however, also return the best distance we did find, it might be useful to someone.
-             if (best.second > __CENTER.second)
-                best.first = this->end();
-             return best;
-          }
-         return std::pair<const_iterator,distance_type>(this->end(),__CENTER.second);
-        }
-
-
-      template <class Predicate>
-      std::pair<const_iterator,distance_type>
-        find_nearest_if( typename _Region::_CenterPt const& __CENTER, Predicate predicate ) const throw ()
-        {
-          if (_M_get_root())
-          {
-             // note: we set the initial 'bounds' to the exact point.
-             // they expand from there outwards.
-             _Region __bounds(__CENTER.first);
-             std::pair<const_iterator,distance_type> best = _M_find_nearest(_M_get_root(), __CENTER, __bounds, 0, predicate);
-             // ensure we return end() if we didn't find it
-             // however, also return the best distance we did find, it might be useful to someone.
-             if (best.second > __CENTER.second)
-                best.first = this->end();
-             return best;
-          }
-         return std::pair<const_iterator,distance_type>(this->end(),__CENTER.second);
-        }
-
+      template <typename _Predicate>
+      std::pair<const_iterator, distance_type>
+      find_nearest_if (const value_type& __val, const distance_type& __max, _Predicate __p) const
+      {
+	if (_M_get_root())
+	  {
+	    std::pair<const _Node<_Val>*,
+	      std::pair<size_t, typename _Acc::result_type> >
+	      best = _S_node_nearest (__K, 0, __val,
+				      _M_get_root(), _M_header, __max,
+				      _M_cmp, _M_acc, _M_dist, __p);
+	    return std::pair<const_iterator, distance_type>
+	      (best.first, best.second.second);
+	  }
+	else
+	  return std::pair<const_iterator, distance_type>(end(), 0);
+      }
 
       void
       optimise()
@@ -481,7 +519,7 @@ namespace KDTree
          assert(parent);
          if (child)
          {
-            _Node_compare compare(level % __K,_M_acc);
+	   _Node_compare compare(level % __K, _M_acc, _M_cmp);
             // REMEMBER! its a <= relationship for BOTH branches
             // for left-case (true), child<=node --> !(node<child)
             // for right-case (false), node<=child --> !(child<node)
@@ -539,7 +577,7 @@ namespace KDTree
       _M_insert(_Link_type __N, const_reference __V,
              size_t const __L) throw (std::bad_alloc)
       {
-        if (_Node_compare(__L % __K,_M_acc)(__V, __N))
+        if (_Node_compare(__L % __K, _M_acc, _M_cmp)(__V, __N))
           {
             if (!_S_left(__N))
               return _M_insert_left(__N, __V);
@@ -619,7 +657,7 @@ namespace KDTree
             // staying balanced.
             // If this were a true binary tree, we would always hunt down the right branch.
             // See top for notes.
-            _Node_compare compare(level % __K,_M_acc);
+	   _Node_compare compare(level % __K, _M_acc, _M_cmp);
             // compare the children based on this level's criteria...
             // (this gives virtually random results)
             if (compare(_S_right(node), _S_left(node)))
@@ -650,7 +688,7 @@ namespace KDTree
         if (_S_is_leaf(node.first))
             return Result(node.first,level);
 
-        _Node_compare compare(node.second % __K,_M_acc);
+        _Node_compare compare(node.second % __K, _M_acc, _M_cmp);
         Result candidate = node;
         if (_S_left(node.first))
           {
@@ -680,7 +718,7 @@ namespace KDTree
         if (_S_is_leaf(node.first))
             return Result(node.first,level);
 
-        _Node_compare compare(node.second % __K,_M_acc);
+        _Node_compare compare(node.second % __K, _M_acc, _M_cmp);
         Result candidate = node;
         if (_S_left(node.first))
           {
@@ -723,7 +761,7 @@ namespace KDTree
          // in different branches.
           const_iterator found = this->end();
 
-        _Node_compare compare(level % __K,_M_acc);
+	  _Node_compare compare(level % __K, _M_acc, _M_cmp);
         if (!compare(node,value))   // note, this is a <= test
           {
            // this line is the only difference between _M_find_exact() and _M_find()
@@ -746,7 +784,7 @@ namespace KDTree
          // in different branches.
           const_iterator found = this->end();
 
-        _Node_compare compare(level % __K,_M_acc);
+	  _Node_compare compare(level % __K, _M_acc, _M_cmp);
         if (!compare(node,value))  // note, this is a <= test
         {
            // this line is the only difference between _M_find_exact() and _M_find()
@@ -766,7 +804,7 @@ namespace KDTree
       _M_matches_node_in_d(_Link_const_type __N, const_reference __V,
                            size_t const __L) const throw ()
       {
-        _Node_compare compare(__L % __K,_M_acc);
+        _Node_compare compare(__L % __K, _M_acc, _M_cmp);
         return !(compare(__N, __V) || compare(__V, __N));
       }
 
@@ -898,12 +936,6 @@ namespace KDTree
        // It expands the bounds as usual and sees if it intersects the centerpt+range.
        // And so it goes ...
 
-         // substitude predicate for normal find_nearest()s
-         struct always_true
-         {
-            bool operator()( _Val const& ) const { return true; }
-         };
-
          template <class Predicate>
          std::pair<const_iterator,distance_type>
         _M_find_nearest( _Link_const_type __N, typename _Region::_CenterPt __CENTER,
@@ -922,7 +954,7 @@ namespace KDTree
                  dist += _M_square( __CENTER.first._M_low_bounds[i] - _M_acc(_S_value(__N),i) );
               }
 #ifdef KDTREE_CHECK_PERFORMANCE
-              ++num_dist_calcs;
+//              ++num_dist_calcs;
 #endif
               dist = sqrt(dist);
 
@@ -971,7 +1003,7 @@ namespace KDTree
                     size_t const __L) throw ()
       {
         if (__A == __B) return;
-        _Node_compare compare(__L % __K,_M_acc);
+        _Node_compare compare(__L % __K, _M_acc, _M_cmp);
         std::sort(__A, __B, compare);
         _Iter __m = __A + (__B - __A) / 2;
         this->insert(*__m);
@@ -1143,11 +1175,13 @@ namespace KDTree
       _Link_type _M_header;
       size_type _M_count;
       _Acc _M_acc;
+      _Cmp _M_cmp;
+      _Dist _M_dist;
 
 #ifdef KDTREE_DEFINE_OSTREAM_OPERATORS
       friend std::ostream&
       operator<<(std::ostream& o,
-                    KDTree<__K, _Val, _Acc, _Cmp, _Alloc> const& tree) throw ()
+		 KDTree<__K, _Val, _Acc, _Dist, _Cmp, _Alloc> const& tree) throw ()
     {
       o << "meta node:   " << *tree._M_header << std::endl;
 
@@ -1157,7 +1191,7 @@ namespace KDTree
       o << "nodes total: " << tree.size() << std::endl;
       o << "dimensions:  " << __K << std::endl;
 
-      typedef KDTree<__K, _Val, _Acc, _Cmp, _Alloc> _Tree;
+      typedef KDTree<__K, _Val, _Acc, _Dist, _Cmp, _Alloc> _Tree;
       typedef typename _Tree::_Link_type _Link_type;
 
       std::stack<_Link_const_type> s;

@@ -1,6 +1,16 @@
 libkdtree++ NEWS
 ================
 
+02 Dec 2007:
+   It's Christmas, and libkdtree++ packs in more power for the find
+   and find_nearest functions. Performance improvement should be
+   carried on with other part of the interface in the coming months.
+
+   As a result of these modification, KDTree definition has been a
+   little altered. The new definition includes a template for a
+   distance calculator. This functor by default calcultes the square
+   of th difference between two elements returned by the accessor.
+
 29 Sep 2007:
    Sylvain Bougerel spent some time cleaning up the code and build
    infrastructure of the code from Sourceforge, and I imported the

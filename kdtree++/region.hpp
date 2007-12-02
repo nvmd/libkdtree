@@ -26,10 +26,13 @@ namespace KDTree
       // bounds should all be set to a specific point.
       typedef std::pair<_Region,_SubVal> _CenterPt;
 
-      _Region(_Acc const& acc) : _M_acc(acc) {}
+      _Region(_Acc const& __acc=_Acc(), const _Cmp& __cmp=_Cmp())
+	: _M_cmp(__acc), _M_acc(__cmp) {}
 
       template <typename Val>
-      _Region(_Acc const& acc, Val const& __V) : _M_acc(acc) 
+      _Region(Val const& __V,
+	      _Acc const& __acc=_Acc(), const _Cmp& __cmp=_Cmp())
+	: _M_acc(__acc), _M_cmp(__cmp)
       {
         for (size_t __i = 0; __i != __K; ++__i)
           {
@@ -38,7 +41,9 @@ namespace KDTree
       }
 
       template <typename Val>
-      _Region(_Acc const& acc, Val const& __V, subvalue_type const& __R) : _M_acc(acc) 
+      _Region(Val const& __V, subvalue_type const& __R,
+	      _Acc const& __acc=_Acc(), const _Cmp& __cmp=_Cmp())
+	: _M_acc(__acc), _M_cmp(__cmp)
       {
         for (size_t __i = 0; __i != __K; ++__i)
           {

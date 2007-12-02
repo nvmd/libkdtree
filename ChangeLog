@@ -1,6 +1,30 @@
 libkdtree++ ChangeLog
 =====================
 
+2007-12-02 Sylvain Bougerel (sylvain.bougerel.devel@gmail.com)
+
+	- Increased the performance of find and find_nearest/find_nearest_if by
+	about 50x to 100x depending on your compilation flags.
+
+	- KDTree are not defined as:
+	KDTree<__K, _Val, _Acc, _Cmp, _Alloc>
+	but as:
+	KDTree<__K, _Val, _Acc, _Dist, _Cmp, _Alloc>
+	So pay attention to the _Dist functor. The distance functor calculate
+	the squared difference between 2 elements returned by the accessor. You
+	might have to change your code to reflect the new definition!
+
+	- The following functors are now accessible in the tree:
+		- the comparison functor, accessible by copy only
+		- the accessor functor, accessible by copy only
+		- the distance functor, accessible read-write, this means that
+		you can modify the behavior of find, find_nearest,
+		find_nearest_if within the same KDTree object.
+
+	- find_exact has not be modified and retained the code of the former,
+	slower algorithm. I have to write some more code to do this. Pls wait a
+	little more.
+
 2007-11-25 Sylvain Bougerel (sylvain.bougerel.devel@gmail.com)
 
 	- fixed the reverse_iterator. Now it can be used.

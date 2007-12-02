@@ -99,8 +99,8 @@ namespace KDTree
         }
     }
 
-    template <size_t const __K, typename _Val,
-              typename _Acc, typename _Cmp, typename _Alloc>
+    template <size_t const __K, typename _Val, typename _Acc,
+	      typename _Dist, typename _Cmp, typename _Alloc>
       friend class KDTree;
   };
 

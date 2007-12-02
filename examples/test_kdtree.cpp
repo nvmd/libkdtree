@@ -22,7 +22,7 @@ std::ostream& operator<<(std::ostream& out, triplet const& T)
   return out << '(' << T.d[0] << ',' << T.d[1] << ',' << T.d[2] << ')';
 }
 
-double tac( triplet t, int k ) { return t[k]; }
+inline double tac( triplet t, int k ) { return t[k]; }
 
 
 typedef KDTree::KDTree<3, triplet, std::pointer_to_binary_function<triplet,int,double> > tree_type;
