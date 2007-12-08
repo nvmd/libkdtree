@@ -445,11 +445,11 @@ namespace KDTree
 	    std::pair<const _Node<_Val>*,
 	      std::pair<size_t, typename _Acc::result_type> >
 	      best = _S_node_nearest (__K, 0, __val,
-				      _M_get_root(), _M_header,
+				      _M_get_root(), _M_header, _M_get_root(),
 				      _S_accumulate_node_distance
 				      (__K, _M_dist, _M_acc, _M_get_root(), __val),
 				      _M_cmp, _M_acc, _M_dist,
-				      always_true<_Val>());
+				      always_true<value_type>());
 	    return std::pair<const_iterator, distance_type>
 	      (best.first, best.second.second);
 	  }
@@ -462,35 +462,55 @@ namespace KDTree
       {
 	if (_M_get_root())
 	  {
+	    const _Node<_Val>* node = _M_get_root();
+	    distance_type max =_S_accumulate_node_distance
+	      (__K, _M_dist, _M_acc, _M_get_root(), __val);
+	    if (__max < max)
+	      {
+		max = __max;
+		node = _M_header;
+	      }
 	    std::pair<const _Node<_Val>*,
 	      std::pair<size_t, typename _Acc::result_type> >
-	      best = _S_node_nearest (__K, 0, __val,
-				      _M_get_root(), _M_header, __max,
-				      _M_cmp, _M_acc, _M_dist,
-				      always_true<_Val>());
+	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), _M_header,
+				      node, max, _M_cmp, _M_acc, _M_dist,
+				      always_true<value_type>());
 	    return std::pair<const_iterator, distance_type>
 	      (best.first, best.second.second);
 	  }
 	else
-	  return std::pair<const_iterator, distance_type>(end(), 0);
+	  return std::pair<const_iterator, distance_type>(end(), __max);
       }
 
       template <typename _Predicate>
       std::pair<const_iterator, distance_type>
-      find_nearest_if (const value_type& __val, const distance_type& __max, _Predicate __p) const
+      find_nearest_if (const value_type& __val, const distance_type& __max,
+		       _Predicate __p) const
       {
 	if (_M_get_root())
 	  {
+	    const _Node<_Val>* node = _M_header;
+	    distance_type max = __max;
+	    if (__p(_M_get_root()))
+	      {
+		node = _M_get_root();
+		max =_S_accumulate_node_distance
+		  (__K, _M_dist, _M_acc, _M_get_root(), __val);
+		if (__max < max)
+		  {
+		    max = __max;
+		    node = _M_header;
+		  }
+	      }
 	    std::pair<const _Node<_Val>*,
 	      std::pair<size_t, typename _Acc::result_type> >
-	      best = _S_node_nearest (__K, 0, __val,
-				      _M_get_root(), _M_header, __max,
-				      _M_cmp, _M_acc, _M_dist, __p);
+	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), _M_header,
+				      node, max, _M_cmp, _M_acc, _M_dist, __p);
 	    return std::pair<const_iterator, distance_type>
 	      (best.first, best.second.second);
 	  }
 	else
-	  return std::pair<const_iterator, distance_type>(end(), 0);
+	  return std::pair<const_iterator, distance_type>(end(), __max);
       }
 
       void

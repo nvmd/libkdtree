@@ -1,7 +1,27 @@
 libkdtree++ ChangeLog
 =====================
 
+2007-12-08 Sylvain Bougerel (sylvain.bougerel.devel@gmail.com)
+
+	- fix bug where find_nearest() could return the wrong value if a
+	maximum distance greater than the root distance to the target value
+	was given in argument to the function.
+
+	- find_nearest() still returns SQUARED value of the distance. You still
+	have to use sqrt() on the second member of the iterator.
+
+	- find_nearest() behavior was slightly changed: if many nodes are at
+	the same distance from the target value, the node with the lowest
+	memory address will be returned. This is to catter for the
+	reimplementation of find_exact() coming soon.
+
 2007-12-02 Sylvain Bougerel (sylvain.bougerel.devel@gmail.com)
+
+	- find_nearest() now returned the SQUARED value of the distance for
+	euclidean space calculation (the default). You have to use sqrt() on
+	the returned distance (i.e. iterator->second) if you want to read the
+	absolute distance returned by find_nearest. My apologies for not
+	making highlighting this beforehand.
 
 	- Increased the performance of find and find_nearest/find_nearest_if by
 	about 50x to 100x depending on your compilation flags.

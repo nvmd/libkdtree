@@ -287,6 +287,9 @@ namespace KDTree
 
   /*! Find the nearest node to __val from __node
 
+    If many nodes are equidistant to __val, the node with the lowest memory
+    address is returned.
+
     \return the nearest node of __end node if no nearest node was found for the
     given arguments.
    */
@@ -296,38 +299,30 @@ namespace KDTree
   inline
   std::pair<const _Node<_Val>*,
 	    std::pair<size_t, typename _Dist::distance_type> >
-  _S_node_nearest (const size_t __k, size_t __dim,
-		   const _Val& __val,
+  _S_node_nearest (const size_t __k, size_t __dim, const _Val& __val,
 		   const _Node<_Val>* __node, const _Node<_Val>* __end,
-		   typename _Dist::distance_type __max,
+		   const _Node<_Val>* __best, typename _Dist::distance_type __max,
 		   const _Cmp& __cmp, const _Acc& __acc, const _Dist& __dist,
 		   _Predicate __p)
   {
     const _Node_base* pcur = __node;
     const _Node_base* cur = _S_node_descend(__dim % __k, __cmp, __acc, __val, __node);
     size_t cur_dim = __dim+1;
-
-//    std::set<_Node_base*> visited;
-//    visited.insert(pcur);
-
     // find the smallest __max distance in direct descent
     while (cur)
       {
 	if (__p(static_cast<const _Node<_Val>* >(cur)->_M_value))
 	  {
 	    typename _Dist::distance_type d = 0;
-	    for (size_t i=0; i < __k && d < __max; ++i)
+	    for (size_t i=0; i < __k && d <= __max; ++i)
 	      d += _S_node_distance(i, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur));
-	    if (d < __max)
+	    if (d < __max || ( d == __max && cur < __best ))
 	      {
-		__node = static_cast<const _Node<_Val>* >(cur);
+		__best = static_cast<const _Node<_Val>* >(cur);
 		__max = d;
 		__dim = cur_dim;
 	      }
 	  }
-
-//	visited.insert(cur);
-
 	pcur = cur;
 	cur = _S_node_descend(cur_dim % __k, __cmp, __acc, __val, cur);
 	++cur_dim;
@@ -348,7 +343,7 @@ namespace KDTree
       near = probe->_M_left;
     if (near
 	// only visit node's children if node's plane intersect hypersphere
-	&& (_S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) < __max))
+	&& (_S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max))
       {
 	probe = near;
 	++probe_dim;
@@ -357,43 +352,6 @@ namespace KDTree
       {
 	while (probe != cur)
 	  {
-
-//	    std::cout << "** pprobe: " << static_cast<_Node<_Val>* >(pprobe)->_M_value << ", val: " << __val << std::flush;
-//	    if (pprobe->_M_left == probe)
-//	      {
-//		std::cout << ", goes left for dim " << (probe_dim-1) << "(" << (probe_dim-1) % __k << ")" << std::endl;
-//		if (!pprobe->_M_right) std::cout << "**    info: right is null" << std::endl;
-//		else if (visited.find(pprobe->_M_right)!=visited.end())
-//		  std::cout << "**    info: right was visited" << std::endl;
-//		if (_S_node_distance((probe_dim-1) % __k, __dist, __acc, __val, static_cast<_Node<_Val>* >(pprobe)) < __max)
-//		  std::cout << "**    info: pprobe node intersect hypersphere" << std::endl;
-//		assert(_S_node_compare((probe_dim-1) % __k, __cmp, __acc, __val, static_cast<_Node<_Val>* >(pprobe))
-//		       || ((!pprobe->_M_right || visited.find(pprobe->_M_right)!=visited.end())
-//			   && _S_node_distance((probe_dim-1) % __k, __dist, __acc, __val, static_cast<_Node<_Val>* >(pprobe)) < __max));
-//	      }
-//	    else if (pprobe->_M_right == probe)
-//	      {
-//		std::cout << ", goes right for dim " << (probe_dim-1) << "(" << (probe_dim-1) % __k << ")" << std::endl;
-//		if (!pprobe->_M_left) std::cout << "**    info: left is null" << std::endl;
-//		else if (visited.find(pprobe->_M_left)!=visited.end())
-//		  std::cout << "**    info: left was visited" << std::endl;
-//		if (_S_node_distance((probe_dim-1) % __k, __dist, __acc, __val, static_cast<_Node<_Val>* >(pprobe)) < __max)
-//		  std::cout << "**    info: pprobe node intersect hypersphere" << std::endl;
-//		assert(!_S_node_compare((probe_dim-1) % __k, __cmp, __acc, __val, static_cast<_Node<_Val>* >(pprobe))
-//		       || ((!pprobe->_M_left || visited.find(pprobe->_M_left)!=visited.end())
-//			   && _S_node_distance((probe_dim-1) % __k, __dist, __acc, __val, static_cast<_Node<_Val>* >(pprobe)) < __max));
-//	      }
-//	    else if (pprobe->_M_parent == probe)
-//	      {
-//		std::cout << ", goes up for dim " << (probe_dim+1) << "(" << (probe_dim+1) % __k << ")" << std::endl;
-//	      }
-//	    else
-//	      {
-//		std::cout << ", pprobe in incorrect states: " << pprobe << " " << probe << std::endl;
-//		assert(0);
-//	      }
-//	    visited.insert(probe);
-
 	    if (_S_node_compare(probe_dim % __k, __cmp, __acc, __val, static_cast<const _Node<_Val>* >(probe)))
 	      {
 		near = probe->_M_left;
@@ -409,11 +367,11 @@ namespace KDTree
 		if (__p(static_cast<const _Node<_Val>* >(probe)->_M_value))
 		  {
 		    typename _Dist::distance_type d = 0;
-		    for (size_t i=0; i < __k && d < __max; ++i)
+		    for (size_t i=0; i < __k && d <= __max; ++i)
 		      d += _S_node_distance(i, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe));
-		    if (d < __max)
+		    if (d < __max || ( d == __max && probe < __best ) )
 		      {
-			__node = static_cast<const _Node<_Val>* >(probe);
+			__best = static_cast<const _Node<_Val>* >(probe);
 			__max = d;
 			__dim = probe_dim;
 		      }
@@ -426,7 +384,7 @@ namespace KDTree
 		  }
 		else if (far &&
 			 // only visit node's children if node's plane intersect hypersphere
-			 _S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) < __max)
+			 _S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max)
 		  {
 		    probe = far;
 		    ++probe_dim;
@@ -441,7 +399,7 @@ namespace KDTree
 	      {
 		if (pprobe == near && far
 		    // only visit node's children if node's plane intersect hypersphere
-		    && _S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) < __max)
+		    && _S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max)
 		  {
 		    pprobe = probe;
 		    probe = far;
@@ -455,10 +413,6 @@ namespace KDTree
 		  }
 	      }
 	  }
-
-//	    std::cout << "** cur: " << static_cast<_Node<_Val>* >(cur)->_M_value << ", val: " << __val << std::flush;
-//		std::cout << ", goes up for dim " << (cur_dim) << "(" << (cur_dim) % __k << ")" << std::endl;
-
 	pcur = cur;
 	cur = cur->_M_parent;
 	--cur_dim;
@@ -473,7 +427,7 @@ namespace KDTree
 	      near = cur->_M_left;
 	    if (near
 		// only visit node's children if node's plane intersect hypersphere
-		&& (_S_node_distance(cur_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur)) < __max))
+		&& (_S_node_distance(cur_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur)) <= __max))
 	      {
 		probe = near;
 		++probe_dim;
@@ -482,9 +436,10 @@ namespace KDTree
       }
     return std::pair<const _Node<_Val>*,
       std::pair<size_t, typename _Dist::distance_type> >
-      (__node, std::pair<size_t, typename _Dist::distance_type>
+      (__best, std::pair<size_t, typename _Dist::distance_type>
        (__dim, __max));
   }
+
 
 #ifdef KDTREE_DEFINE_OSTREAM_OPERATORS
 
