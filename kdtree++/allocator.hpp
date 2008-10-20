@@ -18,8 +18,8 @@ namespace KDTree
     class _Alloc_base
     {
     public:
-      typedef _Node<_Tp> _Node;
-      typedef typename _Node::_Base_ptr _Base_ptr;
+      typedef _Node<_Tp> _Node_;
+      typedef typename _Node_::_Base_ptr _Base_ptr;
       typedef _Alloc allocator_type;
 
       _Alloc_base(allocator_type const& __A)
@@ -34,29 +34,29 @@ namespace KDTree
     protected:
       allocator_type _M_node_allocator;
       
-      _Node*
+      _Node_*
       _M_allocate_node()
       {
         return _M_node_allocator.allocate(1);
       }
 
       void
-      _M_deallocate_node(_Node* const __P)
+      _M_deallocate_node(_Node_* const __P)
       {
         return _M_node_allocator.deallocate(__P, 1);
       }
 
       void
-      _M_construct_node(_Node* __p, _Tp const __V = _Tp(),
+      _M_construct_node(_Node_* __p, _Tp const __V = _Tp(),
                         _Base_ptr const __PARENT = NULL,
                         _Base_ptr const __LEFT = NULL,
                         _Base_ptr const __RIGHT = NULL)
       {
-        new (__p) _Node(__V, __PARENT, __LEFT, __RIGHT);
+        new (__p) _Node_(__V, __PARENT, __LEFT, __RIGHT);
       }
 
       void
-      _M_destroy_node(_Node* __p)
+      _M_destroy_node(_Node_* __p)
       {
         _M_node_allocator.destroy(__p);
       }

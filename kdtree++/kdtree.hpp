@@ -51,6 +51,7 @@
 #ifdef KDTREE_CHECK_PERFORMANCE_COUNTERS
 #  include <map>
 #endif
+#include <algorithm>
 
 #ifdef KDTREE_DEFINE_OSTREAM_OPERATORS
 #  include <ostream>
@@ -93,13 +94,13 @@ namespace KDTree
       typedef _Node<_Val>* _Link_type;
       typedef _Node<_Val> const* _Link_const_type;
 
-      typedef _Node_compare<_Val, _Acc, _Cmp> _Node_compare;
+      typedef _Node_compare<_Val, _Acc, _Cmp> _Node_compare_;
 
       typedef _Region<__K, _Val, typename _Acc::result_type, _Acc, _Cmp>
-        _Region;
+        _Region_;
 
     public:
-      typedef _Region Region;
+      typedef _Region_ Region;
       typedef _Val value_type;
       typedef value_type* pointer;
       typedef value_type const* const_pointer;
@@ -372,16 +373,16 @@ namespace KDTree
         count_within_range(const_reference __V, subvalue_type const __R) const throw ()
         {
           if (!_M_get_root()) return 0;
-          _Region __region(__V, __R, _M_acc, _M_cmp);
+          _Region_ __region(__V, __R, _M_acc, _M_cmp);
           return this->count_within_range(__region);
         }
 
       size_t
-        count_within_range(_Region const& __REGION) const throw ()
+        count_within_range(_Region_ const& __REGION) const throw ()
         {
           if (!_M_get_root()) return 0;
 
-          _Region __bounds(__REGION);
+          _Region_ __bounds(__REGION);
           return _M_count_within_range(_M_get_root(),
                                __REGION, __bounds, 0);
         }
@@ -391,17 +392,17 @@ namespace KDTree
         visit_within_range(SearchVal V, subvalue_type const R, Visitor visitor) const throw ()
         {
           if (!_M_get_root()) return visitor;
-          _Region region(V, R, _M_acc, _M_cmp);
+          _Region_ region(V, R, _M_acc, _M_cmp);
           return this->visit_within_range(region, visitor);
         }
 
       template <class Visitor>
         Visitor
-        visit_within_range(_Region const& REGION, Visitor visitor) const throw ()
+        visit_within_range(_Region_ const& REGION, Visitor visitor) const throw ()
         {
           if (_M_get_root())
             {
-              _Region bounds(REGION);
+              _Region_ bounds(REGION);
               return _M_visit_within_range(visitor, _M_get_root(), REGION, bounds, 0);
             }
           return visitor;
@@ -419,18 +420,18 @@ namespace KDTree
                           _OutputIterator __out) const throw ()
         {
           if (!_M_get_root()) return __out;
-          _Region __region(__V, __R, _M_acc, _M_cmp);
+          _Region_ __region(__V, __R, _M_acc, _M_cmp);
           return this->find_within_range(__region, __out);
         }
 
       template <typename _OutputIterator>
         _OutputIterator
-        find_within_range(_Region const& __REGION,
+        find_within_range(_Region_ const& __REGION,
                           _OutputIterator __out) const throw ()
         {
           if (_M_get_root())
             {
-              _Region __bounds(__REGION);
+              _Region_ __bounds(__REGION);
               __out = _M_find_within_range(__out, _M_get_root(),
                                    __REGION, __bounds, 0);
             }
@@ -539,7 +540,7 @@ namespace KDTree
          assert(parent);
          if (child)
          {
-	   _Node_compare compare(level % __K, _M_acc, _M_cmp);
+	   _Node_compare_ compare(level % __K, _M_acc, _M_cmp);
             // REMEMBER! its a <= relationship for BOTH branches
             // for left-case (true), child<=node --> !(node<child)
             // for right-case (false), node<=child --> !(child<node)
@@ -597,7 +598,7 @@ namespace KDTree
       _M_insert(_Link_type __N, const_reference __V,
              size_t const __L) throw (std::bad_alloc)
       {
-        if (_Node_compare(__L % __K, _M_acc, _M_cmp)(__V, __N))
+        if (_Node_compare_(__L % __K, _M_acc, _M_cmp)(__V, __N))
           {
             if (!_S_left(__N))
               return _M_insert_left(__N, __V);
@@ -677,7 +678,7 @@ namespace KDTree
             // staying balanced.
             // If this were a true binary tree, we would always hunt down the right branch.
             // See top for notes.
-	   _Node_compare compare(level % __K, _M_acc, _M_cmp);
+	   _Node_compare_ compare(level % __K, _M_acc, _M_cmp);
             // compare the children based on this level's criteria...
             // (this gives virtually random results)
             if (compare(_S_right(node), _S_left(node)))
@@ -708,7 +709,7 @@ namespace KDTree
         if (_S_is_leaf(node.first))
             return Result(node.first,level);
 
-        _Node_compare compare(node.second % __K, _M_acc, _M_cmp);
+        _Node_compare_ compare(node.second % __K, _M_acc, _M_cmp);
         Result candidate = node;
         if (_S_left(node.first))
           {
@@ -738,7 +739,7 @@ namespace KDTree
         if (_S_is_leaf(node.first))
             return Result(node.first,level);
 
-        _Node_compare compare(node.second % __K, _M_acc, _M_cmp);
+        _Node_compare_ compare(node.second % __K, _M_acc, _M_cmp);
         Result candidate = node;
         if (_S_left(node.first))
           {
@@ -781,7 +782,7 @@ namespace KDTree
          // in different branches.
           const_iterator found = this->end();
 
-	  _Node_compare compare(level % __K, _M_acc, _M_cmp);
+	  _Node_compare_ compare(level % __K, _M_acc, _M_cmp);
         if (!compare(node,value))   // note, this is a <= test
           {
            // this line is the only difference between _M_find_exact() and _M_find()
@@ -804,7 +805,7 @@ namespace KDTree
          // in different branches.
           const_iterator found = this->end();
 
-	  _Node_compare compare(level % __K, _M_acc, _M_cmp);
+	  _Node_compare_ compare(level % __K, _M_acc, _M_cmp);
         if (!compare(node,value))  // note, this is a <= test
         {
            // this line is the only difference between _M_find_exact() and _M_find()
@@ -824,7 +825,7 @@ namespace KDTree
       _M_matches_node_in_d(_Link_const_type __N, const_reference __V,
                            size_t const __L) const throw ()
       {
-        _Node_compare compare(__L % __K, _M_acc, _M_cmp);
+        _Node_compare_ compare(__L % __K, _M_acc, _M_cmp);
         return !(compare(__N, __V) || compare(__V, __N));
       }
 
@@ -847,8 +848,8 @@ namespace KDTree
       }
 
       size_t
-        _M_count_within_range(_Link_const_type __N, _Region const& __REGION,
-                             _Region const& __BOUNDS,
+        _M_count_within_range(_Link_const_type __N, _Region_ const& __REGION,
+                             _Region_ const& __BOUNDS,
                              size_t const __L) const throw ()
         {
            size_t count = 0;
@@ -858,7 +859,7 @@ namespace KDTree
             }
           if (_S_left(__N))
             {
-              _Region __bounds(__BOUNDS);
+              _Region_ __bounds(__BOUNDS);
               __bounds.set_high_bound(_S_value(__N), __L);
               if (__REGION.intersects_with(__bounds))
                 count += _M_count_within_range(_S_left(__N),
@@ -866,7 +867,7 @@ namespace KDTree
             }
           if (_S_right(__N))
             {
-              _Region __bounds(__BOUNDS);
+              _Region_ __bounds(__BOUNDS);
               __bounds.set_low_bound(_S_value(__N), __L);
               if (__REGION.intersects_with(__bounds))
                 count += _M_count_within_range(_S_right(__N),
@@ -880,8 +881,8 @@ namespace KDTree
       template <class Visitor>
         Visitor
         _M_visit_within_range(Visitor visitor,
-                             _Link_const_type N, _Region const& REGION,
-                             _Region const& BOUNDS,
+                             _Link_const_type N, _Region_ const& REGION,
+                             _Region_ const& BOUNDS,
                              size_t const L) const throw ()
         {
           if (REGION.encloses(_S_value(N)))
@@ -890,7 +891,7 @@ namespace KDTree
             }
           if (_S_left(N))
             {
-              _Region bounds(BOUNDS);
+              _Region_ bounds(BOUNDS);
               bounds.set_high_bound(_S_value(N), L);
               if (REGION.intersects_with(bounds))
                 visitor = _M_visit_within_range(visitor, _S_left(N),
@@ -898,7 +899,7 @@ namespace KDTree
             }
           if (_S_right(N))
             {
-              _Region bounds(BOUNDS);
+              _Region_ bounds(BOUNDS);
               bounds.set_low_bound(_S_value(N), L);
               if (REGION.intersects_with(bounds))
                 visitor = _M_visit_within_range(visitor, _S_right(N),
@@ -913,8 +914,8 @@ namespace KDTree
       template <typename _OutputIterator>
         _OutputIterator
         _M_find_within_range(_OutputIterator __out,
-                             _Link_const_type __N, _Region const& __REGION,
-                             _Region const& __BOUNDS,
+                             _Link_const_type __N, _Region_ const& __REGION,
+                             _Region_ const& __BOUNDS,
                              size_t const __L) const throw ()
         {
           if (__REGION.encloses(_S_value(__N)))
@@ -923,7 +924,7 @@ namespace KDTree
             }
           if (_S_left(__N))
             {
-              _Region __bounds(__BOUNDS);
+              _Region_ __bounds(__BOUNDS);
               __bounds.set_high_bound(_S_value(__N), __L);
               if (__REGION.intersects_with(__bounds))
                 __out = _M_find_within_range(__out, _S_left(__N),
@@ -931,7 +932,7 @@ namespace KDTree
             }
           if (_S_right(__N))
             {
-              _Region __bounds(__BOUNDS);
+              _Region_ __bounds(__BOUNDS);
               __bounds.set_low_bound(_S_value(__N), __L);
               if (__REGION.intersects_with(__bounds))
                 __out = _M_find_within_range(__out, _S_right(__N),
@@ -958,8 +959,8 @@ namespace KDTree
 
          template <class Predicate>
          std::pair<const_iterator,distance_type>
-        _M_find_nearest( _Link_const_type __N, typename _Region::_CenterPt __CENTER,
-                             _Region const& __BOUNDS,
+        _M_find_nearest( _Link_const_type __N, typename _Region_::_CenterPt __CENTER,
+                             _Region_ const& __BOUNDS,
                              size_t const __L,
                              Predicate predicate ) const throw ()
         {
@@ -987,7 +988,7 @@ namespace KDTree
 
           if (_S_left(__N))
             {
-              _Region __bounds(__BOUNDS);
+              _Region_ __bounds(__BOUNDS);
               __bounds.set_high_bound(_S_value(__N), __L);
               if (__bounds.intersects_with(__CENTER))
               {
@@ -1003,7 +1004,7 @@ namespace KDTree
 
           if (_S_right(__N))
             {
-              _Region __bounds(__BOUNDS);
+              _Region_ __bounds(__BOUNDS);
               __bounds.set_low_bound(_S_value(__N), __L);
               if (__bounds.intersects_with(__CENTER))
               {
@@ -1023,7 +1024,7 @@ namespace KDTree
                     size_t const __L) throw ()
       {
         if (__A == __B) return;
-        _Node_compare compare(__L % __K, _M_acc, _M_cmp);
+        _Node_compare_ compare(__L % __K, _M_acc, _M_cmp);
         std::sort(__A, __B, compare);
         _Iter __m = __A + (__B - __A) / 2;
         this->insert(*__m);
