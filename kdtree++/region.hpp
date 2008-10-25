@@ -53,7 +53,7 @@ namespace KDTree
       }
 
       bool
-      intersects_with(_CenterPt const& __THAT) const throw ()
+      intersects_with(_CenterPt const& __THAT) const
       {
         for (size_t __i = 0; __i != __K; ++__i)
           {
@@ -71,7 +71,7 @@ namespace KDTree
       }
 
       bool
-      intersects_with(_Region const& __THAT) const throw ()
+      intersects_with(_Region const& __THAT) const
       {
         for (size_t __i = 0; __i != __K; ++__i)
           {
@@ -83,7 +83,7 @@ namespace KDTree
       }
 
       bool
-      encloses(value_type const& __V) const throw ()
+      encloses(value_type const& __V) const
       {
         for (size_t __i = 0; __i != __K; ++__i)
           {
@@ -95,14 +95,14 @@ namespace KDTree
       }
 
       _Region&
-      set_high_bound(value_type const& __V, size_t const __L) throw ()
+      set_high_bound(value_type const& __V, size_t const __L)
       {
         _M_high_bounds[__L % __K] = _M_acc(__V, __L % __K);
         return *this;
       }
 
       _Region&
-      set_low_bound(value_type const& __V, size_t const __L) throw ()
+      set_low_bound(value_type const& __V, size_t const __L)
       {
         _M_low_bounds[__L % __K] = _M_acc(__V, __L % __K);
         return *this;

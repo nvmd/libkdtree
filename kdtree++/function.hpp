@@ -18,7 +18,7 @@ namespace KDTree
     typedef typename _Val::value_type result_type;
 
     result_type
-    operator()(_Val const& V, size_t const N) const throw ()
+    operator()(_Val const& V, size_t const N) const
     {
       return V[N];
     }

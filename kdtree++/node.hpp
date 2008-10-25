@@ -29,18 +29,18 @@ namespace KDTree
 
     _Node_base(_Base_ptr const __PARENT = NULL,
                _Base_ptr const __LEFT = NULL,
-               _Base_ptr const __RIGHT = NULL) throw ()
+               _Base_ptr const __RIGHT = NULL)
       : _M_parent(__PARENT), _M_left(__LEFT), _M_right(__RIGHT) {}
 
     static _Base_ptr
-    _S_minimum(_Base_ptr __x) throw ()
+    _S_minimum(_Base_ptr __x)
     {
       while (__x->_M_left) __x = __x->_M_left;
       return __x;
     }
 
     static _Base_ptr
-    _S_maximum(_Base_ptr __x) throw ()
+    _S_maximum(_Base_ptr __x)
     {
       while (__x->_M_right) __x = __x->_M_right;
       return __x;
@@ -58,7 +58,7 @@ namespace KDTree
       _Node(_Val const& __VALUE = _Val(),
             _Base_ptr const __PARENT = NULL,
             _Base_ptr const __LEFT = NULL,
-            _Base_ptr const __RIGHT = NULL) throw ()
+            _Base_ptr const __RIGHT = NULL)
         : _Node_base(__PARENT, __LEFT, __RIGHT), _M_value(__VALUE) {}
     };
 
@@ -446,7 +446,7 @@ namespace KDTree
   template <typename _Char, typename _Traits, typename _Val>
     std::basic_ostream<_Char, _Traits>&
     operator<<(std::basic_ostream<_Char, _Traits>& __out,
-               typename KDTree::_Node<_Val> const& __N) throw ()
+               typename KDTree::_Node<_Val> const& __N)
     {
       __out << &__N;
       __out << ' ' << __N._M_value;

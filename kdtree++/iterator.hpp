@@ -19,32 +19,32 @@ namespace KDTree
   template<typename _Val, typename _Ref, typename _Ptr>
     inline bool
     operator==(_Iterator<_Val, _Ref, _Ptr> const&,
-               _Iterator<_Val, _Ref, _Ptr> const&) throw ();
+               _Iterator<_Val, _Ref, _Ptr> const&);
 
   template<typename _Val>
     inline bool
     operator==(_Iterator<_Val, const _Val&, const _Val*> const&,
-               _Iterator<_Val, _Val&, _Val*> const&) throw ();
+               _Iterator<_Val, _Val&, _Val*> const&);
 
   template<typename _Val>
     inline bool
     operator==(_Iterator<_Val, _Val&, _Val*> const&,
-               _Iterator<_Val, const _Val&, const _Val*> const&) throw ();
+               _Iterator<_Val, const _Val&, const _Val*> const&);
 
   template<typename _Val, typename _Ref, typename _Ptr>
     inline bool
     operator!=(_Iterator<_Val, _Ref, _Ptr> const&,
-               _Iterator<_Val, _Ref, _Ptr> const&) throw ();
+               _Iterator<_Val, _Ref, _Ptr> const&);
 
   template<typename _Val>
     inline bool
     operator!=(_Iterator<_Val, const _Val&, const _Val*> const&,
-               _Iterator<_Val, _Val&, _Val*> const&) throw ();
+               _Iterator<_Val, _Val&, _Val*> const&);
 
   template<typename _Val>
     inline bool
     operator!=(_Iterator<_Val, _Val&, _Val*> const&,
-               _Iterator<_Val, const _Val&, const _Val*> const&) throw ();
+               _Iterator<_Val, const _Val&, const _Val*> const&);
 
   class _Base_iterator
   {
@@ -168,63 +168,63 @@ namespace KDTree
 
       friend bool
       operator== <>(_Iterator<_Val, _Ref, _Ptr> const&,
-                    _Iterator<_Val, _Ref, _Ptr> const&) throw ();
+                    _Iterator<_Val, _Ref, _Ptr> const&);
 
       friend bool
       operator== <>(_Iterator<_Val, const _Val&, const _Val*> const&,
-                    _Iterator<_Val, _Val&, _Val*> const&) throw ();
+                    _Iterator<_Val, _Val&, _Val*> const&);
 
       friend bool
       operator== <>(_Iterator<_Val, _Val&, _Val*> const&,
-                    _Iterator<_Val, const _Val&, const _Val*> const&) throw ();
+                    _Iterator<_Val, const _Val&, const _Val*> const&);
 
       friend bool
       operator!= <>(_Iterator<_Val, _Ref, _Ptr> const&,
-                    _Iterator<_Val, _Ref, _Ptr> const&) throw ();
+                    _Iterator<_Val, _Ref, _Ptr> const&);
 
       friend bool
       operator!= <>(_Iterator<_Val, const _Val&, const _Val*> const&,
-                    _Iterator<_Val, _Val&, _Val*> const&) throw ();
+                    _Iterator<_Val, _Val&, _Val*> const&);
 
       friend bool
       operator!= <>(_Iterator<_Val, _Val&, _Val*> const&,
-                    _Iterator<_Val, const _Val&, const _Val*> const&) throw ();
+                    _Iterator<_Val, const _Val&, const _Val*> const&);
     };
 
   template<typename _Val, typename _Ref, typename _Ptr>
     inline bool
     operator==(_Iterator<_Val, _Ref, _Ptr> const& __X,
-               _Iterator<_Val, _Ref, _Ptr> const& __Y) throw ()
+               _Iterator<_Val, _Ref, _Ptr> const& __Y)
     { return __X._M_node == __Y._M_node; }
 
   template<typename _Val>
     inline bool
     operator==(_Iterator<_Val, const _Val&, const _Val*> const& __X,
-               _Iterator<_Val, _Val&, _Val*> const& __Y) throw ()
+               _Iterator<_Val, _Val&, _Val*> const& __Y)
     { return __X._M_node == __Y._M_node; }
 
   template<typename _Val>
     inline bool
     operator==(_Iterator<_Val, _Val&, _Val*> const& __X,
-               _Iterator<_Val, const _Val&, const _Val*> const& __Y) throw ()
+               _Iterator<_Val, const _Val&, const _Val*> const& __Y)
     { return __X._M_node == __Y._M_node; }
 
   template<typename _Val, typename _Ref, typename _Ptr>
     inline bool
     operator!=(_Iterator<_Val, _Ref, _Ptr> const& __X,
-               _Iterator<_Val, _Ref, _Ptr> const& __Y) throw ()
+               _Iterator<_Val, _Ref, _Ptr> const& __Y)
     { return __X._M_node != __Y._M_node; }
 
   template<typename _Val>
     inline bool
     operator!=(_Iterator<_Val, const _Val&, const _Val*> const& __X,
-               _Iterator<_Val, _Val&, _Val*> const& __Y) throw ()
+               _Iterator<_Val, _Val&, _Val*> const& __Y)
     { return __X._M_node != __Y._M_node; }
 
   template<typename _Val>
     inline bool
     operator!=(_Iterator<_Val, _Val&, _Val*> const& __X,
-               _Iterator<_Val, const _Val&, const _Val*> const& __Y) throw ()
+               _Iterator<_Val, const _Val&, const _Val*> const& __Y)
     { return __X._M_node != __Y._M_node; }
 
 } // namespace KDTree

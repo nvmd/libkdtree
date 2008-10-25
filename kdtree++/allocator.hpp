@@ -31,6 +31,22 @@ namespace KDTree
         return _M_node_allocator;
       }
 
+
+      class NoLeakAlloc
+      {
+         _Alloc_base * base;
+         _Node_ * new_node;
+
+      public:
+         NoLeakAlloc(_Alloc_base * b) : base(b), new_node(base->_M_allocate_node()) {}
+
+         _Node_ * get() { return new_node; }
+         void disconnect() { new_node = NULL; }
+
+         ~NoLeakAlloc() { if (new_node) base->_M_deallocate_node(new_node); }
+      };
+
+
     protected:
       allocator_type _M_node_allocator;
       
