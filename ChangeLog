@@ -1,6 +1,25 @@
 libkdtree++ ChangeLog
 =====================
 
+2008-11-10  Sylvain Bougerel  <sylvain.bougerel@asia.thalesgroup.com>
+
+	- kdtree++/iterator.hpp (KDTree): the decrement iterator was
+	ill-written. Its buggy behavior, and the use of non-standard
+	reverse_iterator initialiser needed to be fixed. These error were do to
+	a previous failed attempt by me at fixing the reverse_iterator.
+
+	This time, I believe I got it right, however it needed the kdtree
+	structure to be modified. The reason is that without modification it is
+	not possible to distinguish the "header" from the "root" within the
+	iterator. This is required for the reverse_iterator to work properly.
+
+	Now the kdtree has an additional pointer that points directly to the
+	root. The parent pointer of the header is permanently null. And
+	therefore the header can be distinguished from the root within the
+	iterator by checking the parent of the current node: if it is null, we
+	are at the header.
+
+
 2008-11-10 Sylvain Bougerel (sylvain.bougerel.devel@gmail.com)
 
 	- patch from Martin Shreiber to make libkdtree to compile with newer

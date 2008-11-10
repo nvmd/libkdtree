@@ -81,22 +81,26 @@ namespace KDTree
     inline void
     _M_decrement()
     {
-      if (_M_node->_M_left)
-      {
-            _M_node = _M_node->_M_left;
-            while (_M_node->_M_right) _M_node = _M_node->_M_right;
-      }
+      if (!_M_node->_M_parent) // clearly identify the header node
+	{
+	  _M_node = _M_node->_M_right;
+	}
+      else if (_M_node->_M_left)
+	{
+	  _Base_const_ptr x = _M_node->_M_left;
+	  while (x->_M_right) x = x->_M_right;
+	  _M_node = x;
+	}
       else
-        {
-          _Base_const_ptr __p = _M_node->_M_parent;
-          while (_M_node == __p->_M_left)
-            {
-              _M_node = __p;
-              __p = _M_node->_M_parent;
-            }
-          if (_M_node->_M_left != __p)
-            _M_node = __p;
-        }
+	{
+	  _Base_const_ptr __p = _M_node->_M_parent;
+	  while (_M_node == __p->_M_left)
+	    {
+	      _M_node = __p;
+	      __p = _M_node->_M_parent;
+	    }
+	  _M_node = __p;
+	}
     }
 
     template <size_t const __K, typename _Val, typename _Acc,

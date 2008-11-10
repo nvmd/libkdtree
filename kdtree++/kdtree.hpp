@@ -237,8 +237,8 @@ namespace KDTree
 
       const_iterator begin() const { return const_iterator(_M_get_leftmost()); }
       const_iterator end() const { return const_iterator(_M_header); }
-      const_reverse_iterator rbegin() const { return const_reverse_iterator(_M_get_rightmost()); }
-      const_reverse_iterator rend() const { return const_reverse_iterator(_M_header); }
+      const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+      const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
       // iterator begin() { return iterator(_M_get_leftmost()); }
       // iterator end() { return iterator(_M_header); }
@@ -298,7 +298,8 @@ namespace KDTree
       // erase_exact().
       void
       erase(const_reference __V) {
-        this->erase(this->find(__V));
+	const_iterator b =  this->find(__V);
+        this->erase(b);
       }
 
       void
@@ -571,6 +572,7 @@ namespace KDTree
       {
         _M_set_leftmost(_M_header);
         _M_set_rightmost(_M_header);
+	_M_header->_M_parent = NULL;
         _M_set_root(NULL);
       }
 
@@ -620,7 +622,7 @@ namespace KDTree
 
          // tell dead_dad's parent that his new child is step_dad
         if (dead_dad == _M_get_root())
-           _S_set_parent(_M_header, step_dad);
+           _M_set_root(step_dad);
         else if (_S_left(_S_parent(dead_dad)) == dead_dad)
             _S_set_left(_S_parent(dead_dad), step_dad);
         else
@@ -1035,18 +1037,18 @@ namespace KDTree
       _Link_const_type
       _M_get_root() const
       {
-         return static_cast<_Link_const_type>( _M_header->_M_parent );
+         return static_cast<_Link_const_type>( _M_root );
       }
 
       _Link_type
       _M_get_root()
       {
-         return static_cast<_Link_type>( _M_header->_M_parent );
+         return static_cast<_Link_type>( _M_root );
       }
 
       void _M_set_root(_Node_base * n)
       {
-         _M_header->_M_parent = n;
+         _M_root = n;
       }
 
       _Link_const_type
@@ -1188,6 +1190,7 @@ namespace KDTree
         _M_deallocate_node(__p);
       }
 
+      _Base_ptr _M_root;
       _Link_type _M_header;
       size_type _M_count;
       _Acc _M_acc;
@@ -1200,6 +1203,7 @@ namespace KDTree
 		 KDTree<__K, _Val, _Acc, _Dist, _Cmp, _Alloc> const& tree)
     {
       o << "meta node:   " << *tree._M_header << std::endl;
+      o << "root node:   " << tree._M_root << std::endl;
 
       if (tree.empty())
         return o << "[empty " << __K << "d-tree " << &tree << "]";
