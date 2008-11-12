@@ -101,17 +101,26 @@ int main()
 
   // Testing iterators
   {
+    std::cout << "Testing iterators" << std::endl;
+
+    t.erase(c2);
+    t.erase(c4);
+    t.erase(c6);
+    t.erase(c7);
+    t.erase(c8);
+//    t.erase(c9);
+
+    std::cout << std::endl << t << std::endl;
+
     std::cout << "Forward iterator test..." << std::endl;
-    std::vector<triplet> forwards; // vector is always better than list (unless
-				   // you absolutely need fast delete in the
-				   // middle of the list).
+    std::vector<triplet> forwards;
     for (tree_type::iterator i = t.begin(); i != t.end(); ++i)
-      { std::cout << *i << " "; forwards.push_back(*i); }
+    { std::cout << *i << " " << std::flush; forwards.push_back(*i); }
     std::cout << std::endl;
     std::cout << "Reverse iterator test..." << std::endl;
     std::vector<triplet> backwards;
     for (tree_type::reverse_iterator i = t.rbegin(); i != t.rend(); ++i)
-      { std::cout << *i << " "; backwards.push_back(*i); }
+    { std::cout << *i << " " << std::flush; backwards.push_back(*i); }
     std::cout << std::endl;
     std::reverse(backwards.begin(),backwards.end());
     assert(backwards == forwards);

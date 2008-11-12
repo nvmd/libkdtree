@@ -68,12 +68,13 @@ namespace KDTree
       else
         {
           _Base_const_ptr __p = _M_node->_M_parent;
-          while (_M_node == __p->_M_right)
+          while (__p && _M_node == __p->_M_right)
             {
               _M_node = __p;
               __p = _M_node->_M_parent;
             }
-          if (_M_node->_M_right != __p)
+          if (__p) // (__p) provide undetermined behavior on end()++ rather
+		   // than a seg fault, similar to standard iterator.
             _M_node = __p;
         }
     }
@@ -94,12 +95,14 @@ namespace KDTree
       else
 	{
 	  _Base_const_ptr __p = _M_node->_M_parent;
-	  while (_M_node == __p->_M_left)
+	  while (__p && _M_node == __p->_M_left) // see below
 	    {
 	      _M_node = __p;
 	      __p = _M_node->_M_parent;
 	    }
-	  _M_node = __p;
+	  if (__p) // (__p) provide undetermined behavior on rend()++ rather
+		   // than a seg fault, similar to standard iterator.
+	    _M_node = __p;
 	}
     }
 

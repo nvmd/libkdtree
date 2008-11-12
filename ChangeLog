@@ -1,6 +1,17 @@
 libkdtree++ ChangeLog
 =====================
 
+2008-11-12  Sylvain Bougerel  <sylvain.bougerel@asia.thalesgroup.com>
+
+	- Fix segfault on the regular iterator when _M_header->_M_right ==
+	_M_root. Fix segfault on the reverse iterator when _M_header->_M_left ==
+	_M_root.
+
+	Besides, it also change the behavior when iterating past the end() or
+	rend(). Previously this would result in segfaults, now it makes the
+	iterator points to an undetermined location in the tree, similarly to
+	the current implementation of GNU libstdc++.
+
 2008-11-10  Sylvain Bougerel  <sylvain.bougerel@asia.thalesgroup.com>
 
 	- kdtree++/iterator.hpp (KDTree): the decrement iterator was
