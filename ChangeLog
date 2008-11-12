@@ -1,6 +1,13 @@
 libkdtree++ ChangeLog
 =====================
 
+2008-11-10 Sylvain Bougerel (sylvain.bougerel.devel@gmail.com)
+
+	- patch from Martin Shreiber to make libkdtree to compile with newer
+	version of g++-4.2 and g++4.3.
+
+	- patch from Paul Harris to make libkdtree more exception transparent.
+
 2007-12-08 Sylvain Bougerel (sylvain.bougerel.devel@gmail.com)
 
 	- fix bug where find_nearest() could return the wrong value if a
