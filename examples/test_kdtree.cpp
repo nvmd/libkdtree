@@ -10,7 +10,7 @@
 struct triplet {
   typedef int value_type;
 
-  inline value_type operator[](size_t const N) const { return d[N]; }
+  inline value_type operator[](KDTREE_SIZE_T const N) const { return d[N]; }
 
   value_type d[3];
 };
@@ -24,10 +24,10 @@ std::ostream& operator<<(std::ostream& out, triplet const& T)
   return out << '(' << T.d[0] << ',' << T.d[1] << ',' << T.d[2] << ')';
 }
 
-inline double tac( triplet t, int k ) { return t[k]; }
+inline double tac( triplet t, KDTREE_SIZE_T k ) { return t[k]; }
 
 
-typedef KDTree::KDTree<3, triplet, std::pointer_to_binary_function<triplet,int,double> > tree_type;
+typedef KDTree::KDTree<3, triplet, std::pointer_to_binary_function<triplet,KDTREE_SIZE_T,double> > tree_type;
 
 int main()
 {
@@ -77,7 +77,7 @@ int main()
   std::vector<triplet> v;
   unsigned int const RANGE = 3;
 
-  size_t count = t.count_within_range(s, RANGE);
+  KDTREE_SIZE_T count = t.count_within_range(s, RANGE);
   std::cout << "counted " << count
 	    << " nodes within range " << RANGE << " of " << s << ".\n";
   t.find_within_range(s, RANGE, std::back_inserter(v));

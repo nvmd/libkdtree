@@ -1,4 +1,6 @@
+#define KDTREE_SIZE_T unsigned int
 #include <kdtree++/kdtree.hpp>
+
 #include <vector>
 #include <limits>
 #include <iostream>
@@ -10,7 +12,7 @@ struct duplet
 {
    typedef int value_type;
 
-   inline value_type operator[](size_t const N) const { return d[N]; }
+   inline value_type operator[](int const N) const { return d[N]; }
 
    inline bool operator==(duplet const& other) const
    {
@@ -68,7 +70,7 @@ int main()
 
    dupl_tree_test.optimise();
 
-   int elements;
+   size_t elements;
 
    while (vDuplets.size() > 0) //delete all duplets from tree which are in the vector
    {

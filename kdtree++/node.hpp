@@ -8,13 +8,11 @@
 #define INCLUDE_KDTREE_NODE_HPP
 
 #ifdef KDTREE_DEFINE_OSTREAM_OPERATORS
-#include <iostream>
+#  include <ostream>
 #endif
 
-
-//#include <set>
-
 #include <cstddef>
+#include "kdtree_size_t.hpp"
 
 namespace KDTree
 {
@@ -86,7 +84,7 @@ namespace KDTree
     public:
       typedef _Node<_Val> const* _Link_const_type;
 
-      _Node_compare(size_t const __DIM, _Acc const& acc, _Cmp const& cmp)
+      _Node_compare(KDTREE_SIZE_T const __DIM, _Acc const& acc, _Cmp const& cmp)
 	: _M_DIM(__DIM), _M_acc(acc), _M_cmp(cmp) {}
 
       bool
@@ -115,8 +113,7 @@ namespace KDTree
       }
 
     private:
-
-      size_t const _M_DIM;
+      KDTREE_SIZE_T _M_DIM;	// don't make this const so that an assignment operator can be auto-generated
       _Acc _M_acc;
       _Cmp _M_cmp;
   };
@@ -131,7 +128,7 @@ namespace KDTree
 	    typename _Acc>
   inline
   bool
-  _S_node_compare (const size_t __dim,
+  _S_node_compare (const KDTREE_SIZE_T __dim,
 		   const _Cmp& __cmp, const _Acc& __acc,
 		   const _Val& __a, const _Val& __b)
   {
@@ -142,7 +139,7 @@ namespace KDTree
 	    typename _Acc>
   inline
   bool
-  _S_node_compare (const size_t __dim,
+  _S_node_compare (const KDTREE_SIZE_T __dim,
 		   const _Cmp& __cmp, const _Acc& __acc,
 		   const _Val& __a, const _Node<_Val>* __b)
   {
@@ -153,7 +150,7 @@ namespace KDTree
 	    typename _Acc>
   inline
   bool
-  _S_node_compare (const size_t __dim,
+  _S_node_compare (const KDTREE_SIZE_T __dim,
 		   const _Cmp& __cmp, const _Acc& __acc,
 		   const _Node<_Val>* __a, const _Val& __b)
   {
@@ -164,7 +161,7 @@ namespace KDTree
 	    typename _Acc>
   inline
   bool
-  _S_node_compare (const size_t __dim,
+  _S_node_compare (const KDTREE_SIZE_T __dim,
 		   const _Cmp& __cmp, const _Acc& __acc,
 		   const _Node<_Val>* __a, const _Node<_Val>* __b)
   {
@@ -180,7 +177,7 @@ namespace KDTree
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_node_distance (const size_t __dim,
+  _S_node_distance (const KDTREE_SIZE_T __dim,
 		    const _Dist& __dist, const _Acc& __acc,
 		    const _Val& __a, const _Val& __b)
   {
@@ -191,7 +188,7 @@ namespace KDTree
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_node_distance (const size_t __dim,
+  _S_node_distance (const KDTREE_SIZE_T __dim,
 		    const _Dist& __dist, const _Acc& __acc,
 		    const _Val& __a, const _Node<_Val>* __b)
   {
@@ -202,7 +199,7 @@ namespace KDTree
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_node_distance (const size_t __dim,
+  _S_node_distance (const KDTREE_SIZE_T __dim,
 		    const _Dist& __dist, const _Acc& __acc,
 		    const _Node<_Val>* __a, const _Val& __b)
   {
@@ -213,7 +210,7 @@ namespace KDTree
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_node_distance (const size_t __dim,
+  _S_node_distance (const KDTREE_SIZE_T __dim,
 		    const _Dist& __dist, const _Acc& __acc,
 		    const _Node<_Val>* __a, const _Node<_Val>* __b)
   {
@@ -230,12 +227,12 @@ namespace KDTree
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_accumulate_node_distance (const size_t __dim,
+  _S_accumulate_node_distance (const KDTREE_SIZE_T __dim,
 			       const _Dist& __dist, const _Acc& __acc,
 			       const _Val& __a, const _Val& __b)
   {
     typename _Dist::distance_type d = 0;
-    for (size_t i=0; i<__dim; ++i)
+    for (KDTREE_SIZE_T i=0; i<__dim; ++i)
       d += __dist(__acc(__a, i), __acc(__b, i));
     return d;
   }
@@ -244,13 +241,13 @@ namespace KDTree
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_accumulate_node_distance (const size_t __dim,
+  _S_accumulate_node_distance (const KDTREE_SIZE_T __dim,
 			       const _Dist& __dist, const _Acc& __acc,
 			       const _Val& __a,
 			       const _Node<_Val>* __b)
   {
     typename _Dist::distance_type d = 0;
-    for (size_t i=0; i<__dim; ++i)
+    for (KDTREE_SIZE_T i=0; i<__dim; ++i)
       d += __dist(__acc(__a, i), __acc(__b->_M_value, i));
     return d;
   }
@@ -259,13 +256,13 @@ namespace KDTree
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_accumulate_node_distance (const size_t __dim,
+  _S_accumulate_node_distance (const KDTREE_SIZE_T __dim,
 			       const _Dist& __dist, const _Acc& __acc,
 			       const _Node<_Val>* __a,
 			       const _Val& __b)
   {
     typename _Dist::distance_type d = 0;
-    for (size_t i=0; i<__dim; ++i)
+    for (KDTREE_SIZE_T i=0; i<__dim; ++i)
       d += __dist(__acc(__a->_M_value, i), __acc(__b, i));
     return d;
   }
@@ -274,13 +271,13 @@ namespace KDTree
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_accumulate_node_distance (const size_t __dim,
+  _S_accumulate_node_distance (const KDTREE_SIZE_T __dim,
 			       const _Dist& __dist, const _Acc& __acc,
 			       const _Node<_Val>* __a,
 			       const _Node<_Val>* __b)
   {
     typename _Dist::distance_type d = 0;
-    for (size_t i=0; i<__dim; ++i)
+    for (KDTREE_SIZE_T i=0; i<__dim; ++i)
       d += __dist(__acc(__a->_M_value, i), __acc(__b->_M_value, i));
     return d;
   }
@@ -293,7 +290,7 @@ namespace KDTree
   template <typename _Val, typename _Cmp, typename _Acc>
   inline
   _Node_base*
-  _S_node_descend (const size_t __dim,
+  _S_node_descend (const KDTREE_SIZE_T __dim,
 		   const _Cmp& __cmp, const _Acc& __acc,
 		   const _Val& __val, const _Node_base* __node)
   {
@@ -316,8 +313,8 @@ namespace KDTree
 	    typename _Predicate>
   inline
   std::pair<const _Node<_Val>*,
-	    std::pair<size_t, typename _Dist::distance_type> >
-  _S_node_nearest (const size_t __k, size_t __dim, const _Val& __val,
+	    std::pair<KDTREE_SIZE_T, typename _Dist::distance_type> >
+  _S_node_nearest (const KDTREE_SIZE_T __k, KDTREE_SIZE_T __dim, const _Val& __val,
 		   const _Node<_Val>* __node, const _Node<_Val>* __end,
 		   const _Node<_Val>* __best, typename _Dist::distance_type __max,
 		   const _Cmp& __cmp, const _Acc& __acc, const _Dist& __dist,
@@ -325,14 +322,14 @@ namespace KDTree
   {
     const _Node_base* pcur = __node;
     const _Node_base* cur = _S_node_descend(__dim % __k, __cmp, __acc, __val, __node);
-    size_t cur_dim = __dim+1;
+    KDTREE_SIZE_T cur_dim = __dim+1;
     // find the smallest __max distance in direct descent
     while (cur)
       {
 	if (__p(static_cast<const _Node<_Val>* >(cur)->_M_value))
 	  {
 	    typename _Dist::distance_type d = 0;
-	    for (size_t i=0; i < __k && d <= __max; ++i)
+	    for (KDTREE_SIZE_T i=0; i < __k && d <= __max; ++i)
 	      d += _S_node_distance(i, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur));
 	    if (d < __max || ( d == __max && cur < __best ))
 	      {
@@ -354,7 +351,7 @@ namespace KDTree
     const _Node_base* pprobe = probe;
     const _Node_base* near;
     const _Node_base* far;
-    size_t probe_dim = cur_dim;
+    KDTREE_SIZE_T probe_dim = cur_dim;
     if (_S_node_compare(probe_dim % __k, __cmp, __acc, __val, static_cast<const _Node<_Val>* >(probe)))
       near = probe->_M_right;
     else
@@ -385,7 +382,7 @@ namespace KDTree
 		if (__p(static_cast<const _Node<_Val>* >(probe)->_M_value))
 		  {
 		    typename _Dist::distance_type d = 0;
-		    for (size_t i=0; i < __k && d <= __max; ++i)
+		    for (KDTREE_SIZE_T i=0; i < __k && d <= __max; ++i)
 		      d += _S_node_distance(i, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe));
 		    if (d < __max || ( d == __max && probe < __best ) )
 		      {
@@ -453,8 +450,8 @@ namespace KDTree
 	  }
       }
     return std::pair<const _Node<_Val>*,
-      std::pair<size_t, typename _Dist::distance_type> >
-      (__best, std::pair<size_t, typename _Dist::distance_type>
+      std::pair<KDTREE_SIZE_T, typename _Dist::distance_type> >
+      (__best, std::pair<KDTREE_SIZE_T, typename _Dist::distance_type>
        (__dim, __max));
   }
 

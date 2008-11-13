@@ -62,11 +62,11 @@
 #include <cstddef>
 #include <cassert>
 
-#include <kdtree++/function.hpp>
-#include <kdtree++/allocator.hpp>
-#include <kdtree++/iterator.hpp>
-#include <kdtree++/node.hpp>
-#include <kdtree++/region.hpp>
+#include "function.hpp"
+#include "allocator.hpp"
+#include "iterator.hpp"
+#include "node.hpp"
+#include "region.hpp"
 
 namespace KDTree
 {
@@ -76,7 +76,7 @@ namespace KDTree
 #endif
 
 
-  template <size_t const __K, typename _Val,
+  template <KDTREE_SIZE_T const __K, typename _Val,
             typename _Acc = _Bracket_accessor<_Val>,
 	    typename _Dist = squared_difference<typename _Acc::result_type,
 						typename _Acc::result_type>,
@@ -85,7 +85,6 @@ namespace KDTree
     class KDTree : protected _Alloc_base<_Val, _Alloc>
     {
     protected:
-      // typedef _Alloc allocator_type;
       typedef _Alloc_base<_Val, _Alloc> _Base;
       typedef typename _Base::allocator_type allocator_type;
 
@@ -106,7 +105,7 @@ namespace KDTree
       typedef value_type const& const_reference;
       typedef typename _Acc::result_type subvalue_type;
       typedef typename _Dist::distance_type distance_type;
-      typedef size_t size_type;
+      typedef KDTREE_SIZE_T size_type;
       typedef ptrdiff_t difference_type;
 
       KDTree(_Acc const& __acc = _Acc(), _Dist const& __dist = _Dist(),
@@ -312,7 +311,7 @@ namespace KDTree
          assert(__IT != this->end());
         _Link_const_type target = __IT.get_raw_node();
         _Link_const_type n = target;
-        size_t level = 0;
+        size_type level = 0;
         while ((n = _S_parent(n)) != _M_header)
            ++level;
         _M_erase( const_cast<_Link_type>(target), level );
@@ -353,7 +352,7 @@ namespace KDTree
       // eg
       // struct Item
       // {
-      //    unsigned int unique_id;
+      //    size_type unique_id;
       //    bool operator==(Item const& a, Item const& b) { return a.unique_id == b.unique_id; }
       //    Location location;
       // };
@@ -368,7 +367,7 @@ namespace KDTree
         return _M_find_exact(_M_get_root(), __V, 0);
       }
 
-      size_t
+      size_type
         count_within_range(const_reference __V, subvalue_type const __R) const
         {
           if (!_M_get_root()) return 0;
@@ -376,7 +375,7 @@ namespace KDTree
           return this->count_within_range(__region);
         }
 
-      size_t
+      size_type
         count_within_range(_Region_ const& __REGION) const
         {
           if (!_M_get_root()) return 0;
@@ -443,7 +442,7 @@ namespace KDTree
 	if (_M_get_root())
 	  {
 	    std::pair<const _Node<_Val>*,
-	      std::pair<size_t, typename _Acc::result_type> >
+	      std::pair<size_type, typename _Acc::result_type> >
 	      best = _S_node_nearest (__K, 0, __val,
 				      _M_get_root(), _M_header, _M_get_root(),
 				      _S_accumulate_node_distance
@@ -471,7 +470,7 @@ namespace KDTree
 		node = _M_header;
 	      }
 	    std::pair<const _Node<_Val>*,
-	      std::pair<size_t, typename _Acc::result_type> >
+	      std::pair<size_type, typename _Acc::result_type> >
 	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), _M_header,
 				      node, max, _M_cmp, _M_acc, _M_dist,
 				      always_true<value_type>());
@@ -503,7 +502,7 @@ namespace KDTree
 		  }
 	      }
 	    std::pair<const _Node<_Val>*,
-	      std::pair<size_t, typename _Acc::result_type> >
+	      std::pair<size_type, typename _Acc::result_type> >
 	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), _M_header,
 				      node, max, _M_cmp, _M_acc, _M_dist, __p);
 	    return std::pair<const_iterator, distance_type>
@@ -534,7 +533,7 @@ namespace KDTree
 
     protected:
 
-      void _M_check_children( _Link_const_type child, _Link_const_type parent, size_t const level, bool to_the_left )
+      void _M_check_children( _Link_const_type child, _Link_const_type parent, size_type const level, bool to_the_left )
       {
          assert(parent);
          if (child)
@@ -551,7 +550,7 @@ namespace KDTree
          }
       }
 
-      void _M_check_node( _Link_const_type node, size_t const level )
+      void _M_check_node( _Link_const_type node, size_type const level )
       {
          if (node)
          {
@@ -596,7 +595,7 @@ namespace KDTree
 
       iterator
       _M_insert(_Link_type __N, const_reference __V,
-             size_t const __L)
+             size_type const __L)
       {
         if (_Node_compare_(__L % __K, _M_acc, _M_cmp)(__V, __N))
           {
@@ -613,7 +612,7 @@ namespace KDTree
       }
 
       _Link_type
-      _M_erase(_Link_type dead_dad, size_t const level)
+      _M_erase(_Link_type dead_dad, size_type const level)
       {
          // find a new step_dad, he will become a drop-in replacement.
         _Link_type step_dad = _M_get_erase_replacement(dead_dad, level);
@@ -656,19 +655,19 @@ namespace KDTree
 
 
       _Link_type
-      _M_get_erase_replacement(_Link_type node, size_t const level)
+      _M_get_erase_replacement(_Link_type node, size_type const level)
       {
          // if 'node' is null, then we can't do any better
         if (_S_is_leaf(node))
            return NULL;
 
-        std::pair<_Link_type,size_t> candidate;
+        std::pair<_Link_type,size_type> candidate;
         // if there is nothing to the left, find a candidate on the right tree
         if (!_S_left(node))
-          candidate = _M_get_j_min( std::pair<_Link_type,size_t>(_S_right(node),level), level+1);
+          candidate = _M_get_j_min( std::pair<_Link_type,size_type>(_S_right(node),level), level+1);
         // ditto for the right
         else if ((!_S_right(node)))
-          candidate = _M_get_j_max( std::pair<_Link_type,size_t>(_S_left(node),level), level+1);
+          candidate = _M_get_j_max( std::pair<_Link_type,size_type>(_S_left(node),level), level+1);
         // we have both children ...
         else
          {
@@ -683,9 +682,9 @@ namespace KDTree
             // (this gives virtually random results)
             if (compare(_S_right(node), _S_left(node)))
                // the right is smaller, get our replacement from the SMALLEST on the right
-               candidate = _M_get_j_min(std::pair<_Link_type,size_t>(_S_right(node),level), level+1);
+               candidate = _M_get_j_min(std::pair<_Link_type,size_type>(_S_right(node),level), level+1);
             else
-               candidate = _M_get_j_max( std::pair<_Link_type,size_t>(_S_left(node),level), level+1);
+               candidate = _M_get_j_max( std::pair<_Link_type,size_type>(_S_left(node),level), level+1);
          }
 
         // we have a candidate replacement by now.
@@ -702,10 +701,10 @@ namespace KDTree
 
 
 
-      std::pair<_Link_type,size_t>
-      _M_get_j_min( std::pair<_Link_type,size_t> const node, size_t const level)
+      std::pair<_Link_type,size_type>
+      _M_get_j_min( std::pair<_Link_type,size_type> const node, size_type const level)
       {
-         typedef std::pair<_Link_type,size_t> Result;
+         typedef std::pair<_Link_type,size_type> Result;
         if (_S_is_leaf(node.first))
             return Result(node.first,level);
 
@@ -731,10 +730,10 @@ namespace KDTree
 
 
 
-      std::pair<_Link_type,size_t>
-      _M_get_j_max( std::pair<_Link_type,size_t> const node, size_t const level)
+      std::pair<_Link_type,size_type>
+      _M_get_j_max( std::pair<_Link_type,size_type> const node, size_type const level)
       {
-         typedef std::pair<_Link_type,size_t> Result;
+         typedef std::pair<_Link_type,size_type> Result;
 
         if (_S_is_leaf(node.first))
             return Result(node.first,level);
@@ -774,7 +773,7 @@ namespace KDTree
       }
 
       const_iterator
-      _M_find(_Link_const_type node, const_reference value, size_t const level) const
+      _M_find(_Link_const_type node, const_reference value, size_type const level) const
       {
          // be aware! This is very different to normal binary searches, because of the <=
          // relationship used. See top for notes.
@@ -797,7 +796,7 @@ namespace KDTree
       }
 
       const_iterator
-      _M_find_exact(_Link_const_type node, const_reference value, size_t const level) const
+      _M_find_exact(_Link_const_type node, const_reference value, size_type const level) const
       {
          // be aware! This is very different to normal binary searches, because of the <=
          // relationship used. See top for notes.
@@ -823,7 +822,7 @@ namespace KDTree
 
       bool
       _M_matches_node_in_d(_Link_const_type __N, const_reference __V,
-                           size_t const __L) const
+                           size_type const __L) const
       {
         _Node_compare_ compare(__L % __K, _M_acc, _M_cmp);
         return !(compare(__N, __V) || compare(__V, __N));
@@ -831,9 +830,9 @@ namespace KDTree
 
       bool
       _M_matches_node_in_other_ds(_Link_const_type __N, const_reference __V,
-                                  size_t const __L = 0) const
+                                  size_type const __L = 0) const
       {
-        size_t __i = __L;
+        size_type __i = __L;
         while ((__i = (__i + 1) % __K) != __L % __K)
           if (!_M_matches_node_in_d(__N, __V, __i)) return false;
         return true;
@@ -841,18 +840,18 @@ namespace KDTree
 
       bool
       _M_matches_node(_Link_const_type __N, const_reference __V,
-                      size_t __L = 0) const
+                      size_type __L = 0) const
       {
         return _M_matches_node_in_d(__N, __V, __L)
           && _M_matches_node_in_other_ds(__N, __V, __L);
       }
 
-      size_t
+      size_type
         _M_count_within_range(_Link_const_type __N, _Region_ const& __REGION,
                              _Region_ const& __BOUNDS,
-                             size_t const __L) const
+                             size_type const __L) const
         {
-           size_t count = 0;
+           size_type count = 0;
           if (__REGION.encloses(_S_value(__N)))
             {
                ++count;
@@ -883,7 +882,7 @@ namespace KDTree
         _M_visit_within_range(Visitor visitor,
                              _Link_const_type N, _Region_ const& REGION,
                              _Region_ const& BOUNDS,
-                             size_t const L) const
+                             size_type const L) const
         {
           if (REGION.encloses(_S_value(N)))
             {
@@ -916,7 +915,7 @@ namespace KDTree
         _M_find_within_range(_OutputIterator out,
                              _Link_const_type __N, _Region_ const& __REGION,
                              _Region_ const& __BOUNDS,
-                             size_t const __L) const
+                             size_type const __L) const
         {
           if (__REGION.encloses(_S_value(__N)))
             {
@@ -961,7 +960,7 @@ namespace KDTree
          std::pair<const_iterator,distance_type>
         _M_find_nearest( _Link_const_type __N, typename _Region_::_CenterPt __CENTER,
                              _Region_ const& __BOUNDS,
-                             size_t const __L,
+                             size_type const __L,
                              Predicate predicate ) const
         {
            std::pair<const_iterator,distance_type> best(this->end(),__CENTER.second);
@@ -970,7 +969,7 @@ namespace KDTree
            if (predicate(*const_iterator(__N)))
            {
               distance_type dist = 0;
-              for ( size_t i = 0; i != __K; ++i )
+              for ( size_type i = 0; i != __K; ++i )
               {
                  dist += _M_square( __CENTER.first._M_low_bounds[i] - _M_acc(_S_value(__N),i) );
               }
@@ -1021,7 +1020,7 @@ namespace KDTree
       template <typename _Iter>
         void
         _M_optimise(_Iter const& __A, _Iter const& __B,
-                    size_t const __L)
+                    size_type const __L)
       {
         if (__A == __B) return;
         _Node_compare_ compare(__L % __K, _M_acc, _M_cmp);

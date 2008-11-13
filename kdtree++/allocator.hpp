@@ -9,7 +9,7 @@
 
 #include <cstddef>
 
-#include <kdtree++/node.hpp>
+#include "node.hpp"
 
 namespace KDTree
 {
