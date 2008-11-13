@@ -60,6 +60,24 @@ namespace KDTree
             _Base_ptr const __LEFT = NULL,
             _Base_ptr const __RIGHT = NULL)
         : _Node_base(__PARENT, __LEFT, __RIGHT), _M_value(__VALUE) {}
+
+#ifdef KDTREE_DEFINE_OSTREAM_OPERATORS
+
+     template <typename Char, typename Traits>
+       friend
+       std::basic_ostream<Char, Traits>&
+       operator<<(typename std::basic_ostream<Char, Traits>& out,
+                  _Node<_Val> const& node)
+       {
+         out << &node;
+         out << ' ' << node._M_value;
+         out << "; parent: " << node._M_parent;
+         out << "; left: " << node._M_left;
+         out << "; right: " << node._M_right;
+         return out;
+       }
+
+#endif
     };
 
   template <typename _Val, typename _Acc, typename _Cmp>
@@ -440,23 +458,6 @@ namespace KDTree
        (__dim, __max));
   }
 
-
-#ifdef KDTREE_DEFINE_OSTREAM_OPERATORS
-
-  template <typename _Char, typename _Traits, typename _Val>
-    std::basic_ostream<_Char, _Traits>&
-    operator<<(std::basic_ostream<_Char, _Traits>& __out,
-               typename KDTree::_Node<_Val> const& __N)
-    {
-      __out << &__N;
-      __out << ' ' << __N._M_value;
-      __out << "; parent: " << __N._M_parent;
-      __out << "; left: " << __N._M_left;
-      __out << "; right: " << __N._M_right;
-      return __out;
-    }
-
-#endif
 
 } // namespace KDTree
 

@@ -112,8 +112,9 @@ namespace KDTree
   };
 
   template <typename _Val, typename _Ref, typename _Ptr>
-    struct _Iterator : protected _Base_iterator
+    class _Iterator : protected _Base_iterator
     {
+    public:
       typedef _Val value_type;
       typedef _Ref reference;
       typedef _Ptr pointer;
@@ -130,6 +131,11 @@ namespace KDTree
         : _Base_iterator(__N) {}
       inline _Iterator(iterator const& __THAT)
         : _Base_iterator(__THAT) {}
+
+      _Link_const_type get_raw_node() const
+      {
+         return _Link_const_type(_M_node);
+      }
 
       reference
       operator*() const

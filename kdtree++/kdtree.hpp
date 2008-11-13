@@ -96,11 +96,9 @@ namespace KDTree
 
       typedef _Node_compare<_Val, _Acc, _Cmp> _Node_compare_;
 
+    public:
       typedef _Region<__K, _Val, typename _Acc::result_type, _Acc, _Cmp>
         _Region_;
-
-    public:
-      typedef _Region_ Region;
       typedef _Val value_type;
       typedef value_type* pointer;
       typedef value_type const* const_pointer;
@@ -312,7 +310,7 @@ namespace KDTree
       erase(const_iterator const& __IT)
       {
          assert(__IT != this->end());
-        _Link_const_type target = static_cast<_Link_const_type>(__IT._M_node);
+        _Link_const_type target = __IT.get_raw_node();
         _Link_const_type n = target;
         size_t level = 0;
         while ((n = _S_parent(n)) != _M_header)
@@ -417,26 +415,26 @@ namespace KDTree
 
       template <typename SearchVal, typename _OutputIterator>
         _OutputIterator
-        find_within_range(SearchVal __V, subvalue_type const __R,
-                          _OutputIterator __out) const
+        find_within_range(SearchVal val, subvalue_type const range,
+                          _OutputIterator out) const
         {
-          if (!_M_get_root()) return __out;
-          _Region_ __region(__V, __R, _M_acc, _M_cmp);
-          return this->find_within_range(__region, __out);
+          if (!_M_get_root()) return out;
+          _Region_ region(val, range, _M_acc, _M_cmp);
+          return this->find_within_range(region, out);
         }
 
       template <typename _OutputIterator>
         _OutputIterator
-        find_within_range(_Region_ const& __REGION,
-                          _OutputIterator __out) const
+        find_within_range(_Region_ const& region,
+                          _OutputIterator out) const
         {
           if (_M_get_root())
             {
-              _Region_ __bounds(__REGION);
-              __out = _M_find_within_range(__out, _M_get_root(),
-                                   __REGION, __bounds, 0);
+              _Region_ bounds(region);
+              out = _M_find_within_range(out, _M_get_root(),
+                                   region, bounds, 0);
             }
-          return __out;
+          return out;
         }
 
       std::pair<const_iterator, distance_type>
@@ -915,21 +913,21 @@ namespace KDTree
 
       template <typename _OutputIterator>
         _OutputIterator
-        _M_find_within_range(_OutputIterator __out,
+        _M_find_within_range(_OutputIterator out,
                              _Link_const_type __N, _Region_ const& __REGION,
                              _Region_ const& __BOUNDS,
                              size_t const __L) const
         {
           if (__REGION.encloses(_S_value(__N)))
             {
-              *__out++ = _S_value(__N);
+              *out++ = _S_value(__N);
             }
           if (_S_left(__N))
             {
               _Region_ __bounds(__BOUNDS);
               __bounds.set_high_bound(_S_value(__N), __L);
               if (__REGION.intersects_with(__bounds))
-                __out = _M_find_within_range(__out, _S_left(__N),
+                out = _M_find_within_range(out, _S_left(__N),
                                      __REGION, __bounds, __L+1);
             }
           if (_S_right(__N))
@@ -937,11 +935,11 @@ namespace KDTree
               _Region_ __bounds(__BOUNDS);
               __bounds.set_low_bound(_S_value(__N), __L);
               if (__REGION.intersects_with(__bounds))
-                __out = _M_find_within_range(__out, _S_right(__N),
+                out = _M_find_within_range(out, _S_right(__N),
                                      __REGION, __bounds, __L+1);
             }
 
-          return __out;
+          return out;
         }
 
         // quick little power function

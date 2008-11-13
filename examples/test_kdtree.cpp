@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <functional>
 
 struct triplet {
   typedef int value_type;

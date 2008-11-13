@@ -2,6 +2,7 @@
 #include <vector>
 #include <limits>
 #include <iostream>
+#include <functional>
 
 using namespace std;
 
