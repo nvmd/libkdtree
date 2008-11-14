@@ -17,6 +17,9 @@ else (WIN32)
    # Maximum warning level
    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
+   # turn on debugging
+   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+
 endif (WIN32)
 
 include_directories (${PROJECT_SOURCE_DIR})
