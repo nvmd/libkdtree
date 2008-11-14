@@ -75,8 +75,7 @@ namespace KDTree
    unsigned long long num_dist_calcs = 0;
 #endif
 
-
-  template <KDTREE_SIZE_T const __K, typename _Val,
+  template <size_type const __K, typename _Val,
             typename _Acc = _Bracket_accessor<_Val>,
 	    typename _Dist = squared_difference<typename _Acc::result_type,
 						typename _Acc::result_type>,
@@ -105,19 +104,19 @@ namespace KDTree
       typedef value_type const& const_reference;
       typedef typename _Acc::result_type subvalue_type;
       typedef typename _Dist::distance_type distance_type;
-      typedef KDTREE_SIZE_T size_type;
+      typedef ::KDTree::size_type size_type;
       typedef ptrdiff_t difference_type;
 
       KDTree(_Acc const& __acc = _Acc(), _Dist const& __dist = _Dist(),
 	     _Cmp const& __cmp = _Cmp(), const allocator_type& __a = allocator_type())
-        : _Base(__a), _M_header(_Base::_M_allocate_node()),
+        : _Base(__a), _M_header(),
 	  _M_count(0), _M_acc(__acc), _M_cmp(__cmp), _M_dist(__dist)
       {
          _M_empty_initialise();
       }
 
       KDTree(const KDTree& __x)
-         : _Base(__x.get_allocator()), _M_header(_Base::_M_allocate_node()), _M_count(0),
+         : _Base(__x.get_allocator()), _M_header(), _M_count(0),
 	   _M_acc(__x._M_acc), _M_cmp(__x._M_cmp), _M_dist(__x._M_dist)
       {
          _M_empty_initialise();
@@ -129,7 +128,7 @@ namespace KDTree
         KDTree(_InputIterator __first, _InputIterator __last,
 	       _Acc const& acc = _Acc(), _Dist const& __dist = _Dist(),
 	       _Cmp const& __cmp = _Cmp(), const allocator_type& __a = allocator_type())
-        : _Base(__a), _M_header(_Base::_M_allocate_node()), _M_count(0),
+        : _Base(__a), _M_header(), _M_count(0),
 	  _M_acc(acc), _M_cmp(__cmp), _M_dist(__dist)
       {
          _M_empty_initialise();
@@ -152,7 +151,6 @@ namespace KDTree
       ~KDTree()
       {
         this->clear();
-        _M_deallocate_node(_M_header);
       }
 
       allocator_type
@@ -183,8 +181,8 @@ namespace KDTree
       clear()
       {
         _M_erase_subtree(_M_get_root());
-        _M_set_leftmost(_M_header);
-        _M_set_rightmost(_M_header);
+        _M_set_leftmost(&_M_header);
+        _M_set_rightmost(&_M_header);
         _M_set_root(NULL);
         _M_count = 0;
       }
@@ -225,22 +223,13 @@ namespace KDTree
       typedef _Iterator<_Val, const_reference, const_pointer> const_iterator;
       // No mutable iterator at this stage
       typedef const_iterator iterator;
-
-//      typedef std::reverse_iterator<iterator> reverse_iterator;
-      // TODO: const_reverse_iterators are broken
-      // see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=244894
       typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
       typedef std::reverse_iterator<iterator> reverse_iterator;
 
       const_iterator begin() const { return const_iterator(_M_get_leftmost()); }
-      const_iterator end() const { return const_iterator(_M_header); }
+      const_iterator end() const { return const_iterator(static_cast<_Link_const_type>(&_M_header)); }
       const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
       const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
-
-      // iterator begin() { return iterator(_M_get_leftmost()); }
-      // iterator end() { return iterator(_M_header); }
-      // reverse_iterator rbegin() { return reverse_iterator(end()); }
-      // reverse_iterator rend() { return reverse_iterator(begin()); }
 
       iterator
       insert(iterator /* ignored */, const_reference __V)
@@ -253,7 +242,7 @@ namespace KDTree
       {
         if (!_M_get_root())
           {
-            _Link_type __n = _M_new_node(__V, _M_header);
+            _Link_type __n = _M_new_node(__V, &_M_header);
             ++_M_count;
             _M_set_root(__n);
             _M_set_leftmost(__n);
@@ -312,7 +301,7 @@ namespace KDTree
         _Link_const_type target = __IT.get_raw_node();
         _Link_const_type n = target;
         size_type level = 0;
-        while ((n = _S_parent(n)) != _M_header)
+        while ((n = _S_parent(n)) != &_M_header)
            ++level;
         _M_erase( const_cast<_Link_type>(target), level );
         _M_delete_node( const_cast<_Link_type>(target) );
@@ -444,7 +433,7 @@ namespace KDTree
 	    std::pair<const _Node<_Val>*,
 	      std::pair<size_type, typename _Acc::result_type> >
 	      best = _S_node_nearest (__K, 0, __val,
-				      _M_get_root(), _M_header, _M_get_root(),
+				      _M_get_root(), static_cast<_Link_const_type>(&_M_header), _M_get_root(),
 				      _S_accumulate_node_distance
 				      (__K, _M_dist, _M_acc, _M_get_root(), __val),
 				      _M_cmp, _M_acc, _M_dist,
@@ -467,11 +456,11 @@ namespace KDTree
 	    if (__max < max)
 	      {
 		max = __max;
-		node = _M_header;
+		node = _M_get_root();
 	      }
 	    std::pair<const _Node<_Val>*,
 	      std::pair<size_type, typename _Acc::result_type> >
-	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), _M_header,
+	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), static_cast<_Link_const_type>(&_M_header),
 				      node, max, _M_cmp, _M_acc, _M_dist,
 				      always_true<value_type>());
 	    return std::pair<const_iterator, distance_type>
@@ -488,7 +477,7 @@ namespace KDTree
       {
 	if (_M_get_root())
 	  {
-	    const _Node<_Val>* node = _M_header;
+	    const _Node<_Val>* node = _M_get_root();
 	    distance_type max = __max;
 	    if (__p(_M_get_root()))
 	      {
@@ -498,12 +487,12 @@ namespace KDTree
 		if (__max < max)
 		  {
 		    max = __max;
-		    node = _M_header;
+		    node = _M_get_root();
 		  }
 	      }
 	    std::pair<const _Node<_Val>*,
 	      std::pair<size_type, typename _Acc::result_type> >
-	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), _M_header,
+	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), static_cast<_Link_const_type>(&_M_header),
 				      node, max, _M_cmp, _M_acc, _M_dist, __p);
 	    return std::pair<const_iterator, distance_type>
 	      (best.first, best.second.second);
@@ -567,9 +556,9 @@ namespace KDTree
 
       void _M_empty_initialise()
       {
-        _M_set_leftmost(_M_header);
-        _M_set_rightmost(_M_header);
-	_M_header->_M_parent = NULL;
+        _M_set_leftmost(&_M_header);
+        _M_set_rightmost(&_M_header);
+	_M_header._M_parent = NULL;
         _M_set_root(NULL);
       }
 
@@ -1034,7 +1023,7 @@ namespace KDTree
       _Link_const_type
       _M_get_root() const
       {
-         return static_cast<_Link_const_type>( _M_root );
+         return static_cast<_Link_const_type>(_M_root);
       }
 
       _Link_type
@@ -1043,7 +1032,7 @@ namespace KDTree
          return static_cast<_Link_type>( _M_root );
       }
 
-      void _M_set_root(_Node_base * n)
+      void _M_set_root(_Link_type n)
       {
          _M_root = n;
       }
@@ -1051,25 +1040,25 @@ namespace KDTree
       _Link_const_type
       _M_get_leftmost() const
       {
-        return static_cast<_Link_type>( _M_header->_M_left );
+        return static_cast<_Link_type>(_M_header._M_left);
       }
 
       void
       _M_set_leftmost( _Node_base * a )
       {
-         _M_header->_M_left = a;
+         _M_header._M_left = a;
       }
 
       _Link_const_type
       _M_get_rightmost() const
       {
-        return static_cast<_Link_type>( _M_header->_M_right );
+        return static_cast<_Link_type>( _M_header._M_right );
       }
 
       void
       _M_set_rightmost( _Node_base * a )
       {
-         _M_header->_M_right = a;
+         _M_header._M_right = a;
       }
 
       static _Link_type
@@ -1187,8 +1176,8 @@ namespace KDTree
         _M_deallocate_node(__p);
       }
 
-      _Base_ptr _M_root;
-      _Link_type _M_header;
+      _Link_type _M_root;
+      _Node_base _M_header;
       size_type _M_count;
       _Acc _M_acc;
       _Cmp _M_cmp;
@@ -1199,7 +1188,7 @@ namespace KDTree
       operator<<(std::ostream& o,
 		 KDTree<__K, _Val, _Acc, _Dist, _Cmp, _Alloc> const& tree)
     {
-      o << "meta node:   " << *tree._M_header << std::endl;
+      o << "meta node:   " << tree._M_header << std::endl;
       o << "root node:   " << tree._M_root << std::endl;
 
       if (tree.empty())

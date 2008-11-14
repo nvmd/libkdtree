@@ -4,6 +4,14 @@
  * \author Paul Harris <paulharris@computer.org>
  */
 
-#ifndef KDTREE_SIZE_T
-#  define KDTREE_SIZE_T size_t
-#endif
+#ifndef KDTREE_SIZE_TYPE_HPP
+#define KDTREE_SIZE_TYPE_HPP
+
+#include <cstddef>
+
+namespace KDTree
+{
+ typedef std::size_t size_type;
+}
+
+#endif // KDTREE_SIZE_TYPE_HPP

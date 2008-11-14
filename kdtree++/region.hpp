@@ -14,7 +14,7 @@
 namespace KDTree
 {
 
-  template <KDTREE_SIZE_T const __K, typename _Val, typename _SubVal,
+  template <size_type const __K, typename _Val, typename _SubVal,
             typename _Acc, typename _Cmp>
     struct _Region
     {
@@ -34,7 +34,7 @@ namespace KDTree
 	      _Acc const& __acc=_Acc(), const _Cmp& __cmp=_Cmp())
 	: _M_acc(__acc), _M_cmp(__cmp)
       {
-        for (KDTREE_SIZE_T __i = 0; __i != __K; ++__i)
+        for (size_type __i = 0; __i != __K; ++__i)
           {
              _M_low_bounds[__i] = _M_high_bounds[__i] = _M_acc(__V,__i);
           }
@@ -45,7 +45,7 @@ namespace KDTree
 	      _Acc const& __acc=_Acc(), const _Cmp& __cmp=_Cmp())
 	: _M_acc(__acc), _M_cmp(__cmp)
       {
-        for (KDTREE_SIZE_T __i = 0; __i != __K; ++__i)
+        for (size_type __i = 0; __i != __K; ++__i)
           {
              _M_low_bounds[__i] = _M_acc(__V,__i) - __R;
              _M_high_bounds[__i] = _M_acc(__V,__i) + __R;
@@ -55,7 +55,7 @@ namespace KDTree
       bool
       intersects_with(_CenterPt const& __THAT) const
       {
-        for (KDTREE_SIZE_T __i = 0; __i != __K; ++__i)
+        for (size_type __i = 0; __i != __K; ++__i)
           {
              // does it fall outside the bounds? 
              // ! low-tolerance <= x <= high+tolerance
@@ -73,7 +73,7 @@ namespace KDTree
       bool
       intersects_with(_Region const& __THAT) const
       {
-        for (KDTREE_SIZE_T __i = 0; __i != __K; ++__i)
+        for (size_type __i = 0; __i != __K; ++__i)
           {
             if (_M_cmp(__THAT._M_high_bounds[__i], _M_low_bounds[__i])
              || _M_cmp(_M_high_bounds[__i], __THAT._M_low_bounds[__i]))
@@ -85,7 +85,7 @@ namespace KDTree
       bool
       encloses(value_type const& __V) const
       {
-        for (KDTREE_SIZE_T __i = 0; __i != __K; ++__i)
+        for (size_type __i = 0; __i != __K; ++__i)
           {
             if (_M_cmp(_M_acc(__V, __i), _M_low_bounds[__i])
              || _M_cmp(_M_high_bounds[__i], _M_acc(__V, __i)))
@@ -95,14 +95,14 @@ namespace KDTree
       }
 
       _Region&
-      set_high_bound(value_type const& __V, KDTREE_SIZE_T const __L)
+      set_high_bound(value_type const& __V, size_type const __L)
       {
         _M_high_bounds[__L % __K] = _M_acc(__V, __L % __K);
         return *this;
       }
 
       _Region&
-      set_low_bound(value_type const& __V, KDTREE_SIZE_T const __L)
+      set_low_bound(value_type const& __V, size_type const __L)
       {
         _M_low_bounds[__L % __K] = _M_acc(__V, __L % __K);
         return *this;
