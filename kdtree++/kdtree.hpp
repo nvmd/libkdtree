@@ -785,7 +785,7 @@ namespace KDTree
         if (!compare(node,value))   // note, this is a <= test
           {
            // this line is the only difference between _M_find_exact() and _M_find()
-            if (_M_matches_node_in_other_ds(node, value, level))
+            if (_M_matches_node(node, value, level))
               return const_iterator(node);   // return right away
             if (_S_left(node))
                found = _M_find(_S_left(node), value, level+1);

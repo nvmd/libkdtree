@@ -97,5 +97,20 @@ int main()
 
       dupl_tree_test.erase(element_to_erase); //erase() : will probably erase wrong element sooner or later
       //dupl_tree_test.erase_exact(element_to_erase); --> this works
+
+      // now check that it cannot find the element UNLESS there is another one with the identical location in the list...
+      if (find(vDuplets.begin(),vDuplets.end(),element_to_erase) == vDuplets.end())
+      {
+         duplet_tree_type::iterator not_there = dupl_tree_test.find(element_to_erase);
+         if (not_there != dupl_tree_test.end())
+         {
+            cout << "SHOULD NOT HAVE FOUND THIS: " << *not_there << endl;
+            assert(0);
+         }
+         else
+         {
+            cout << "  find() double-check passed." << endl;
+         }
+      }
    }
 }
