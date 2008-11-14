@@ -6,9 +6,41 @@
 #include <vector>
 #include <limits>
 #include <functional>
+#include <set>
 
-struct triplet {
+// used to ensure all triplets that are accessed via the operator<< are initialised.
+std::set<const void*> registered;
+
+struct triplet
+{
   typedef int value_type;
+
+   triplet(value_type a, value_type b, value_type c)
+   {
+      d[0] = a;
+      d[1] = b;
+      d[2] = c;
+      bool reg_ok = (registered.find(this) == registered.end());
+      assert(reg_ok);
+      registered.insert(this).second;
+   }
+
+   triplet(const triplet & x)
+   {
+      d[0] = x.d[0];
+      d[1] = x.d[1];
+      d[2] = x.d[2];
+      bool reg_ok = (registered.find(this) == registered.end());
+      assert(reg_ok);
+      registered.insert(this).second;
+   }
+
+   ~triplet()
+   {
+      bool unreg_ok = (registered.find(this) != registered.end());
+      assert(unreg_ok);
+      registered.erase(this);
+   }
 
   inline value_type operator[](KDTREE_SIZE_T const N) const { return d[N]; }
 
@@ -21,6 +53,7 @@ inline bool operator==(triplet const& A, triplet const& B) {
 
 std::ostream& operator<<(std::ostream& out, triplet const& T)
 {
+   assert(registered.find(&T) != registered.end());
   return out << '(' << T.d[0] << ',' << T.d[1] << ',' << T.d[2] << ')';
 }
 
@@ -34,16 +67,16 @@ int main()
 
   tree_type t(std::ptr_fun(tac));
 
-  triplet c0 = { {5, 4, 0} }; t.insert(c0);
-  triplet c1 = { {4, 2, 1} }; t.insert(c1);
-  triplet c2 = { {7, 6, 9} }; t.insert(c2);
-  triplet c3 = { {2, 2, 1} }; t.insert(c3);
-  triplet c4 = { {8, 0, 5} }; t.insert(c4);
-  triplet c5 = { {5, 7, 0} }; t.insert(c5);
-  triplet c6 = { {3, 3, 8} }; t.insert(c6);
-  triplet c7 = { {9, 7, 3} }; t.insert(c7);
-  triplet c8 = { {2, 2, 6} }; t.insert(c8);
-  triplet c9 = { {2, 0, 6} }; t.insert(c9);
+  triplet c0(5, 4, 0); t.insert(c0);
+  triplet c1(4, 2, 1); t.insert(c1);
+  triplet c2(7, 6, 9); t.insert(c2);
+  triplet c3(2, 2, 1); t.insert(c3);
+  triplet c4(8, 0, 5); t.insert(c4);
+  triplet c5(5, 7, 0); t.insert(c5);
+  triplet c6(3, 3, 8); t.insert(c6);
+  triplet c7(9, 7, 3); t.insert(c7);
+  triplet c8(2, 2, 6); t.insert(c8);
+  triplet c9(2, 0, 6); t.insert(c9);
 
   std::cout << t << std::endl;
 
@@ -73,7 +106,7 @@ int main()
       return 1;
     }
 
-  triplet s = { {5, 4, 3} };
+  triplet s(5, 4, 3);
   std::vector<triplet> v;
   unsigned int const RANGE = 3;
 
@@ -92,7 +125,7 @@ int main()
   std::cout << "Nearest to " << s << ": " <<
      *t.find_nearest(s,std::numeric_limits<double>::max()).first << std::endl;
 
-  triplet s2 = { {10, 10, 2} };
+  triplet s2(10, 10, 2);
   std::cout << "Nearest to " << s2 << ": " <<
      *t.find_nearest(s2,std::numeric_limits<double>::max()).first << std::endl;
 
