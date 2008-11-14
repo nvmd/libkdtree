@@ -15,7 +15,7 @@ if (WIN32)
 else (WIN32)
 
    # Maximum warning level
-   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
+   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 endif (WIN32)
 
