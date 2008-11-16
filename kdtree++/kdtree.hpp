@@ -139,16 +139,13 @@ namespace KDTree
       KDTree&
       operator=(const KDTree& __x)
       {
-	if (this != &__x)
-	  {
+         if (this != &__x)
+         {
             this->clear();
-	    _M_acc = __x._M_acc;
-	    _M_dist = __x._M_dist;
-	    _M_cmp = __x._M_cmp;
             this->insert(begin(),__x.begin(),__x.end());
             this->optimize();
-	  }
-	return *this;
+         }
+         return *this;
       }
 
       ~KDTree()
