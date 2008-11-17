@@ -244,6 +244,9 @@ namespace KDTree
       typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
       typedef std::reverse_iterator<iterator> reverse_iterator;
 
+      // Note: the static_cast in end() is invalid (_M_header is not convertable to a _Link_type), but
+      // thats ok as it just means undefined behaviour if the user dereferences the end() iterator.
+
       const_iterator begin() const { return const_iterator(_M_get_leftmost()); }
       const_iterator end() const { return const_iterator(static_cast<_Link_const_type>(&_M_header)); }
       const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
@@ -451,7 +454,7 @@ namespace KDTree
 	    std::pair<const _Node<_Val>*,
 	      std::pair<size_type, typename _Acc::result_type> >
 	      best = _S_node_nearest (__K, 0, __val,
-				      _M_get_root(), static_cast<_Link_const_type>(&_M_header), _M_get_root(),
+				      _M_get_root(), &_M_header, _M_get_root(),
 				      _S_accumulate_node_distance
 				      (__K, _M_dist, _M_acc, _M_get_root(), __val),
 				      _M_cmp, _M_acc, _M_dist,
@@ -478,7 +481,7 @@ namespace KDTree
 	      }
 	    std::pair<const _Node<_Val>*,
 	      std::pair<size_type, typename _Acc::result_type> >
-	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), static_cast<_Link_const_type>(&_M_header),
+	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), &_M_header,
 				      node, max, _M_cmp, _M_acc, _M_dist,
 				      always_true<value_type>());
 	    return std::pair<const_iterator, distance_type>
@@ -510,7 +513,7 @@ namespace KDTree
 	      }
 	    std::pair<const _Node<_Val>*,
 	      std::pair<size_type, typename _Acc::result_type> >
-	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), static_cast<_Link_const_type>(&_M_header),
+	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), &_M_header,
 				      node, max, _M_cmp, _M_acc, _M_dist, __p);
 	    return std::pair<const_iterator, distance_type>
 	      (best.first, best.second.second);
@@ -1041,13 +1044,13 @@ namespace KDTree
       _Link_const_type
       _M_get_root() const
       {
-         return static_cast<_Link_const_type>(_M_root);
+         return const_cast<_Link_const_type>(_M_root);
       }
 
       _Link_type
       _M_get_root()
       {
-         return static_cast<_Link_type>( _M_root );
+         return _M_root;
       }
 
       void _M_set_root(_Link_type n)
