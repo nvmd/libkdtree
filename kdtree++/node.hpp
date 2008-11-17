@@ -327,7 +327,7 @@ namespace KDTree
   std::pair<const _Node<_Val>*,
 	    std::pair<size_t, typename _Dist::distance_type> >
   _S_node_nearest (const size_t __k, size_t __dim, const _Val& __val,
-		   const _Node<_Val>* __node, const _Node<_Val>* __end,
+		   const _Node<_Val>* __node, const _Node_base* __end,
 		   const _Node<_Val>* __best, typename _Dist::distance_type __max,
 		   const _Cmp& __cmp, const _Acc& __acc, const _Dist& __dist,
 		   _Predicate __p)
