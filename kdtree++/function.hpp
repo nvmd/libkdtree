@@ -9,7 +9,6 @@
 #define INCLUDE_KDTREE_ACCESSOR_HPP
 
 #include <cstddef>
-#include "kdtree_size_t.hpp"
 
 namespace KDTree
 {
@@ -19,7 +18,7 @@ namespace KDTree
     typedef typename _Val::value_type result_type;
 
     result_type
-    operator()(_Val const& V, size_type const N) const
+    operator()(_Val const& V, size_t const N) const
     {
       return V[N];
     }

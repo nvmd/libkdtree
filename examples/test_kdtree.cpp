@@ -15,34 +15,34 @@ struct triplet
 {
   typedef int value_type;
 
-   triplet(value_type a, value_type b, value_type c)
-   {
-      d[0] = a;
-      d[1] = b;
-      d[2] = c;
-      // bool reg_ok = (registered.find(this) == registered.end());
-      // assert(reg_ok);
-      // registered.insert(this).second;
-   }
+  triplet(value_type a, value_type b, value_type c)
+  {
+    d[0] = a;
+    d[1] = b;
+    d[2] = c;
+    // bool reg_ok = (registered.find(this) == registered.end());
+    // assert(reg_ok);
+    // registered.insert(this).second;
+  }
 
-   triplet(const triplet & x)
-   {
-      d[0] = x.d[0];
-      d[1] = x.d[1];
-      d[2] = x.d[2];
-      // bool reg_ok = (registered.find(this) == registered.end());
-      // assert(reg_ok);
-      // registered.insert(this).second;
-   }
+  triplet(const triplet & x)
+  {
+    d[0] = x.d[0];
+    d[1] = x.d[1];
+    d[2] = x.d[2];
+    // bool reg_ok = (registered.find(this) == registered.end());
+    // assert(reg_ok);
+    // registered.insert(this).second;
+  }
 
-   ~triplet()
-   {
-      // bool unreg_ok = (registered.find(this) != registered.end());
-      // assert(unreg_ok);
-      // registered.erase(this);
-   }
+  ~triplet()
+  {
+    // bool unreg_ok = (registered.find(this) != registered.end());
+    // assert(unreg_ok);
+    // registered.erase(this);
+  }
 
-  inline value_type operator[](KDTree::size_type const N) const { return d[N]; }
+  inline value_type operator[](size_t const N) const { return d[N]; }
 
   value_type d[3];
 };
@@ -53,14 +53,14 @@ inline bool operator==(triplet const& A, triplet const& B) {
 
 std::ostream& operator<<(std::ostream& out, triplet const& T)
 {
-   // assert(registered.find(&T) != registered.end());
+  // assert(registered.find(&T) != registered.end());
   return out << '(' << T.d[0] << ',' << T.d[1] << ',' << T.d[2] << ')';
 }
 
-inline double tac( triplet t, KDTree::size_type k ) { return t[k]; }
+inline double tac( triplet t, size_t k ) { return t[k]; }
 
 
-typedef KDTree::KDTree<3, triplet, std::pointer_to_binary_function<triplet,KDTree::size_type,double> > tree_type;
+typedef KDTree::KDTree<3, triplet, std::pointer_to_binary_function<triplet,size_t,double> > tree_type;
 
 int main()
 {
@@ -90,104 +90,103 @@ int main()
   std::cout << std::endl << src << std::endl;
 
   tree_type copied(src);
-  copied.clear();
   std::cout << copied << std::endl;
   tree_type assigned;
   assigned = src;
+  std::cout << assigned << std::endl;
 
-  for (int loop = 0; loop != 1; ++loop)
-  {
-     tree_type * target;
+  for (int loop = 0; loop != 3; ++loop)
+    {
+      tree_type * target = &src; // Get rid of a warning on uninitialized value
       switch (loop)
+	{
+	case 0: std::cout << "Testing plain construction" << std::endl;
+	  target = &src;
+	  break;
+
+	case 1: std::cout << "Testing copy-construction" << std::endl;
+	  target = &copied;
+	  break;
+
+	case 2: std::cout << "Testing assign-construction" << std::endl;
+	  target = &assigned;
+	  break;
+	}
+      tree_type & t = *target;
+
+      int i=0;
+      for (tree_type::const_iterator iter=t.begin(); iter!=t.end(); ++iter, ++i);
+      std::cout << "iterator walked through " << i << " nodes in total" << std::endl;
+      if (i!=6)
+	{
+	  std::cerr << "Error: does not tally with the expected number of nodes (6)" << std::endl;
+	  return 1;
+	}
+      i=0;
+      for (tree_type::const_reverse_iterator iter=t.rbegin(); iter!=t.rend(); ++iter, ++i);
+      std::cout << "reverse_iterator walked through " << i << " nodes in total" << std::endl;
+      if (i!=6)
+	{
+	  std::cerr << "Error: does not tally with the expected number of nodes (6)" << std::endl;
+	  return 1;
+	}
+
+      triplet s(5, 4, 3);
+      std::vector<triplet> v;
+      unsigned int const RANGE = 3;
+
+      size_t count = t.count_within_range(s, RANGE);
+      std::cout << "counted " << count
+		<< " nodes within range " << RANGE << " of " << s << ".\n";
+      t.find_within_range(s, RANGE, std::back_inserter(v));
+
+      std::cout << "found   " << v.size() << " nodes within range " << RANGE
+		<< " of " << s << ":\n";
+      std::vector<triplet>::const_iterator ci = v.begin();
+      for (; ci != v.end(); ++ci)
+	std::cout << *ci << " ";
+      std::cout << "\n" << std::endl;
+
+      std::cout << std::endl << t << std::endl;
+
+      std::cout << "Nearest to " << s << ": " <<
+	*t.find_nearest(s,std::numeric_limits<double>::max()).first << std::endl;
+
+      triplet s2(10, 10, 2);
+      std::cout << "Nearest to " << s2 << ": " <<
+	*t.find_nearest(s2,std::numeric_limits<double>::max()).first << std::endl;
+
+      std::cout << std::endl;
+
+      std::cout << t << std::endl;
+
+      // Testing iterators
       {
-         case 0: std::cout << "Testing plain construction" << std::endl;
-                 target = &src;
-                 break;
+	std::cout << "Testing iterators" << std::endl;
 
-         case 1: std::cout << "Testing copy-construction" << std::endl;
-                 target = &copied;
-                 break;
+	t.erase(c2);
+	t.erase(c4);
+	t.erase(c6);
+	t.erase(c7);
+	t.erase(c8);
+	//    t.erase(c9);
 
-         case 2: std::cout << "Testing assign-construction" << std::endl;
-                 target = &assigned;
-                 break;
+	std::cout << std::endl << t << std::endl;
+
+	std::cout << "Forward iterator test..." << std::endl;
+	std::vector<triplet> forwards;
+	for (tree_type::iterator i = t.begin(); i != t.end(); ++i)
+	  { std::cout << *i << " " << std::flush; forwards.push_back(*i); }
+	std::cout << std::endl;
+	std::cout << "Reverse iterator test..." << std::endl;
+	std::vector<triplet> backwards;
+	for (tree_type::reverse_iterator i = t.rbegin(); i != t.rend(); ++i)
+	  { std::cout << *i << " " << std::flush; backwards.push_back(*i); }
+	std::cout << std::endl;
+	std::reverse(backwards.begin(),backwards.end());
+	assert(backwards == forwards);
       }
-
-  tree_type & t = *target;
-
-  int i=0;
-  for (tree_type::const_iterator iter=t.begin(); iter!=t.end(); ++iter, ++i);
-  std::cout << "iterator walked through " << i << " nodes in total" << std::endl;
-  if (i!=6)
-    {
-      std::cerr << "Error: does not tally with the expected number of nodes (6)" << std::endl;
-      return 1;
     }
-  i=0;
-  for (tree_type::const_reverse_iterator iter=t.rbegin(); iter!=t.rend(); ++iter, ++i);
-  std::cout << "reverse_iterator walked through " << i << " nodes in total" << std::endl;
-  if (i!=6)
-    {
-      std::cerr << "Error: does not tally with the expected number of nodes (6)" << std::endl;
-      return 1;
-    }
-
-  triplet s(5, 4, 3);
-  std::vector<triplet> v;
-  unsigned int const RANGE = 3;
-
-  KDTree::size_type count = t.count_within_range(s, RANGE);
-  std::cout << "counted " << count
-	    << " nodes within range " << RANGE << " of " << s << ".\n";
-  t.find_within_range(s, RANGE, std::back_inserter(v));
-
-  std::cout << "found   " << v.size() << " nodes within range " << RANGE
-	    << " of " << s << ":\n";
-  std::vector<triplet>::const_iterator ci = v.begin();
-  for (; ci != v.end(); ++ci)
-    std::cout << *ci << " ";
-  std::cout << "\n" << std::endl;
-
-  std::cout << std::endl << t << std::endl;
-
-  std::cout << "Nearest to " << s << ": " <<
-     *t.find_nearest(s,std::numeric_limits<double>::max()).first << std::endl;
-
-  triplet s2(10, 10, 2);
-  std::cout << "Nearest to " << s2 << ": " <<
-     *t.find_nearest(s2,std::numeric_limits<double>::max()).first << std::endl;
-
-  std::cout << std::endl;
-
-  std::cout << t << std::endl;
-
-  // Testing iterators
-  {
-    std::cout << "Testing iterators" << std::endl;
-
-    t.erase(c2);
-    t.erase(c4);
-    t.erase(c6);
-    t.erase(c7);
-    t.erase(c8);
-//    t.erase(c9);
-
-    std::cout << std::endl << t << std::endl;
-
-    std::cout << "Forward iterator test..." << std::endl;
-    std::vector<triplet> forwards;
-    for (tree_type::iterator i = t.begin(); i != t.end(); ++i)
-    { std::cout << *i << " " << std::flush; forwards.push_back(*i); }
-    std::cout << std::endl;
-    std::cout << "Reverse iterator test..." << std::endl;
-    std::vector<triplet> backwards;
-    for (tree_type::reverse_iterator i = t.rbegin(); i != t.rend(); ++i)
-    { std::cout << *i << " " << std::flush; backwards.push_back(*i); }
-    std::cout << std::endl;
-    std::reverse(backwards.begin(),backwards.end());
-    assert(backwards == forwards);
-  }
-  }
 
   return 0;
 }

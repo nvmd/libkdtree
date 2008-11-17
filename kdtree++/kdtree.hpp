@@ -75,7 +75,7 @@ namespace KDTree
    unsigned long long num_dist_calcs = 0;
 #endif
 
-  template <size_type const __K, typename _Val,
+  template <size_t const __K, typename _Val,
             typename _Acc = _Bracket_accessor<_Val>,
 	    typename _Dist = squared_difference<typename _Acc::result_type,
 						typename _Acc::result_type>,
@@ -104,7 +104,7 @@ namespace KDTree
       typedef value_type const& const_reference;
       typedef typename _Acc::result_type subvalue_type;
       typedef typename _Dist::distance_type distance_type;
-      typedef ::KDTree::size_type size_type;
+      typedef size_t size_type;
       typedef ptrdiff_t difference_type;
 
       KDTree(_Acc const& __acc = _Acc(), _Dist const& __dist = _Dist(),
