@@ -1,6 +1,24 @@
 libkdtree++ ChangeLog
 =====================
 
+2008-11-17  Sylvain Bougerel  <sylvain.bougerel@asia.thalesgroup.com>
+
+	- The version number of the library is now part of the headers.
+	- Fixed a bug with assignment operator.
+	- Fixed uninitialized memory problem with valgrind, when printing the
+	content of the tree. Due to the fact the _M_header was a _Link_type
+	instead of a _Node_base type and _M_root was a _Base_ptr type instead of
+	a _Link_type.
+	- Paul Harris fixed find() by ensuring that the correct node is being
+	matched during a find(). Thus, fixed a similar problem in erase. Paul
+	also added a new test courtesy of Hayne.
+	- Paul Harris augmented test_kdtree with various test on copy
+	construction, assignment, and formatting operator.
+	- Paul Harris added support for CMake, which should suit not only
+	MSVC users but others too.
+	- Paul Harris fixed bug with compiling with MSVC2005 with the 64bit
+	warnings turned on.
+
 2008-11-12  Sylvain Bougerel  <sylvain.bougerel@asia.thalesgroup.com>
 
 	- Fix segfault on the regular iterator when _M_header->_M_right ==
