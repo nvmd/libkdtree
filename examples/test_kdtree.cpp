@@ -46,7 +46,7 @@ struct triplet
   {
      double dist = 0;
      for (int i = 0; i != 3; ++i)
-        dist += d[i]*x.d[i];
+        dist += (d[i]-x.d[i])*(d[i]-x.d[i]);
      return sqrt(dist);
   }
 
@@ -91,11 +91,37 @@ int main()
       tree_type exact_dist(std::ptr_fun(tac));
         triplet c0(5, 4, 0);
         exact_dist.insert(c0);
-        triplet target(6,4,0);
+        triplet target(7,4,0);
 
-      std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target,1);
+      std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target,2);
       assert(found.first != exact_dist.end());
+      assert(found.second == 2);
       std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << std::endl;
+   }
+
+   {
+      tree_type exact_dist(std::ptr_fun(tac));
+        triplet c0(5, 2, 0);
+        exact_dist.insert(c0);
+        triplet target(7,4,0);
+
+        // call find_nearest without a range value - it found a compile error earlier.
+      std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target);
+      assert(found.first != exact_dist.end());
+      std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << " @ " << found.second << " should be " << sqrt(8) << std::endl;
+      assert(found.second == sqrt(8));
+   }
+
+   {
+      tree_type exact_dist(std::ptr_fun(tac));
+        triplet c0(5, 2, 0);
+        exact_dist.insert(c0);
+        triplet target(7,4,0);
+
+      std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target,sqrt(8));
+      assert(found.first != exact_dist.end());
+      std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << " @ " << found.second << " should be " << sqrt(8) << std::endl;
+      assert(found.second == sqrt(8));
    }
 
   tree_type src(std::ptr_fun(tac));
@@ -243,12 +269,20 @@ int main()
 
 
 
-      std::cout << "Nearest to " << s << ": " <<
-	*t.find_nearest(s,std::numeric_limits<double>::max()).first << std::endl;
+      {
+      std::pair<tree_type::const_iterator,double> found = t.find_nearest(s,std::numeric_limits<double>::max());
+      std::cout << "Nearest to " << s << " @ " << found.second << " " << *found.first << std::endl;
+      std::cout << "Should be " << found.first->distance_to(s) << std::endl;
+      assert(found.second == found.first->distance_to(s));
+      }
 
+      {
       triplet s2(10, 10, 2);
-      std::cout << "Nearest to " << s2 << ": " <<
-	*t.find_nearest(s2,std::numeric_limits<double>::max()).first << std::endl;
+      std::pair<tree_type::const_iterator,double> found = t.find_nearest(s2,std::numeric_limits<double>::max());
+      std::cout << "Nearest to " << s2 << " @ " << found.second << " " << *found.first << std::endl;
+      std::cout << "Should be " << found.first->distance_to(s2) << std::endl;
+      assert(found.second == found.first->distance_to(s2));
+      }
 
       std::cout << std::endl;
 
