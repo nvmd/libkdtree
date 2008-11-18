@@ -42,6 +42,14 @@ struct triplet
     registered.erase(this);
   }
 
+  double distance_to(triplet const& x) const
+  {
+     double dist = 0;
+     for (int i = 0; i != 3; ++i)
+        dist += d[i]*x.d[i];
+     return sqrt(dist);
+  }
+
   inline value_type operator[](size_t const N) const { return d[N]; }
 
   value_type d[3];
@@ -188,6 +196,21 @@ int main()
       std::cout << "\n" << std::endl;
 
       std::cout << std::endl << t << std::endl;
+
+
+      {
+         const double small_dist = 0.0001;
+         std::pair<tree_type::const_iterator,double> notfound = t.find_nearest(s,small_dist);
+         std::cout << "Test find_nearest(), nearest to " << s << " within " << small_dist << " should not be found" << std::endl;
+
+         if (notfound.first != t.end())
+         {
+            std::cout << "ERROR found a node at dist " << notfound.second << " : " << *notfound.first << std::endl;
+            std::cout << "Actual distance = " << s.distance_to(*notfound.first) << std::endl;
+         }
+
+         assert(notfound.first == t.end());
+      }
 
       {
          std::pair<tree_type::const_iterator,double> nif = t.find_nearest_if(s,std::numeric_limits<double>::max(),Predicate());
