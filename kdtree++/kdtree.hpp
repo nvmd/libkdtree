@@ -516,63 +516,68 @@ namespace KDTree
 	    return std::pair<const_iterator, distance_type>
 	      (best.first, best.second.second);
 	  }
-	else
 	  return std::pair<const_iterator, distance_type>(end(), 0);
       }
 
       std::pair<const_iterator, distance_type>
-      find_nearest (const value_type& __val, const distance_type& __max) const
+      find_nearest (const value_type& __val, distance_type __max) const
       {
 	if (_M_get_root())
 	  {
+        bool root_is_candidate = false;
 	    const _Node<_Val>* node = _M_get_root();
-	    distance_type max =_S_accumulate_node_distance
+       { // scope to ensure we don't use 'root_dist' anywhere else
+	    distance_type root_dist =_S_accumulate_node_distance
 	      (__K, _M_dist, _M_acc, _M_get_root(), __val);
-	    if (__max < max)
+	    if (root_dist <= __max)
 	      {
-		max = __max;
-		node = _M_get_root();
+            root_is_candidate = true;
+            __max = root_dist;
 	      }
+       }
 	    std::pair<const _Node<_Val>*,
 	      std::pair<size_type, typename _Acc::result_type> >
 	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), &_M_header,
-				      node, max, _M_cmp, _M_acc, _M_dist,
+				      node, __max, _M_cmp, _M_acc, _M_dist,
 				      always_true<value_type>());
-	    return std::pair<const_iterator, distance_type>
-	      (best.first, best.second.second);
+       // make sure we didn't just get stuck with the root node...
+       if (root_is_candidate || best.first != _M_get_root())
+          return std::pair<const_iterator, distance_type>
+            (best.first, best.second.second);
 	  }
-	else
 	  return std::pair<const_iterator, distance_type>(end(), __max);
       }
 
       template <typename _Predicate>
       std::pair<const_iterator, distance_type>
-      find_nearest_if (const value_type& __val, const distance_type& __max,
+      find_nearest_if (const value_type& __val, distance_type __max,
 		       _Predicate __p) const
       {
 	if (_M_get_root())
 	  {
+        bool root_is_candidate = false;
 	    const _Node<_Val>* node = _M_get_root();
-	    distance_type max = __max;
 	    if (__p(_M_get_root()->_M_value))
 	      {
-		node = _M_get_root();
-		max =_S_accumulate_node_distance
+            { // scope to ensure we don't use root_dist anywhere else
+	    distance_type root_dist = _S_accumulate_node_distance
 		  (__K, _M_dist, _M_acc, _M_get_root(), __val);
-		if (__max < max)
+		if (root_dist <= __max)
 		  {
-		    max = __max;
-		    node = _M_get_root();
+           root_is_candidate = true;
+		    root_dist = __max;
 		  }
+            }
 	      }
 	    std::pair<const _Node<_Val>*,
 	      std::pair<size_type, typename _Acc::result_type> >
 	      best = _S_node_nearest (__K, 0, __val, _M_get_root(), &_M_header,
-				      node, max, _M_cmp, _M_acc, _M_dist, __p);
-	    return std::pair<const_iterator, distance_type>
-	      (best.first, best.second.second);
+				      node, __max, _M_cmp, _M_acc, _M_dist, __p);
+       // make sure we didn't just get stuck with the root node...
+       if (root_is_candidate || best.first != _M_get_root())
+          return std::pair<const_iterator, distance_type>
+            (best.first, best.second.second);
 	  }
-	else
 	  return std::pair<const_iterator, distance_type>(end(), __max);
       }
 
@@ -606,8 +611,8 @@ namespace KDTree
             // REMEMBER! its a <= relationship for BOTH branches
             // for left-case (true), child<=node --> !(node<child)
             // for right-case (false), node<=child --> !(child<node)
-            assert(!to_the_left or !compare(parent,child));  // check the left
-            assert(to_the_left or !compare(child,parent));   // check the right
+            assert(!to_the_left || !compare(parent,child));  // check the left
+            assert(to_the_left || !compare(child,parent));   // check the right
             // and recurse down the tree, checking everything
             _M_check_children(_S_left(child),parent,level,to_the_left);
             _M_check_children(_S_right(child),parent,level,to_the_left);
