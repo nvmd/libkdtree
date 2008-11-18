@@ -9,7 +9,7 @@
 #include <set>
 
 // used to ensure all triplets that are accessed via the operator<< are initialised.
-// std::set<const void*> registered;
+std::set<const void*> registered;
 
 struct triplet
 {
@@ -20,9 +20,9 @@ struct triplet
     d[0] = a;
     d[1] = b;
     d[2] = c;
-    // bool reg_ok = (registered.find(this) == registered.end());
-    // assert(reg_ok);
-    // registered.insert(this).second;
+    bool reg_ok = (registered.find(this) == registered.end());
+    assert(reg_ok);
+    registered.insert(this).second;
   }
 
   triplet(const triplet & x)
@@ -30,16 +30,16 @@ struct triplet
     d[0] = x.d[0];
     d[1] = x.d[1];
     d[2] = x.d[2];
-    // bool reg_ok = (registered.find(this) == registered.end());
-    // assert(reg_ok);
-    // registered.insert(this).second;
+    bool reg_ok = (registered.find(this) == registered.end());
+    assert(reg_ok);
+    registered.insert(this).second;
   }
 
   ~triplet()
   {
-    // bool unreg_ok = (registered.find(this) != registered.end());
-    // assert(unreg_ok);
-    // registered.erase(this);
+    bool unreg_ok = (registered.find(this) != registered.end());
+    assert(unreg_ok);
+    registered.erase(this);
   }
 
   inline value_type operator[](size_t const N) const { return d[N]; }
@@ -53,7 +53,7 @@ inline bool operator==(triplet const& A, triplet const& B) {
 
 std::ostream& operator<<(std::ostream& out, triplet const& T)
 {
-  // assert(registered.find(&T) != registered.end());
+  assert(registered.find(&T) != registered.end());
   return out << '(' << T.d[0] << ',' << T.d[1] << ',' << T.d[2] << ')';
 }
 
@@ -87,6 +87,27 @@ int main()
 
   src.optimise();
 
+
+  // test the efficient_replace_and_optimise()
+  tree_type eff_repl = src;
+  {
+     std::vector<triplet> vec;
+     // erased above as part of test vec.push_back(triplet(5, 4, 0));
+     // erased above as part of test vec.push_back(triplet(4, 2, 1));
+     vec.push_back(triplet(7, 6, 9));
+     // erased above as part of test vec.push_back(triplet(2, 2, 1));
+     vec.push_back(triplet(8, 0, 5));
+     // erased above as part of test vec.push_back(triplet(5, 7, 0));
+     vec.push_back(triplet(3, 3, 8));
+     vec.push_back(triplet(9, 7, 3));
+     vec.push_back(triplet(2, 2, 6));
+     vec.push_back(triplet(2, 0, 6));
+
+     eff_repl.clear();
+     eff_repl.efficient_replace_and_optimise(vec);
+  }
+
+
   std::cout << std::endl << src << std::endl;
 
   tree_type copied(src);
@@ -95,9 +116,9 @@ int main()
   assigned = src;
   std::cout << assigned << std::endl;
 
-  for (int loop = 0; loop != 3; ++loop)
+  for (int loop = 0; loop != 4; ++loop)
     {
-      tree_type * target = &src; // Get rid of a warning on uninitialized value
+      tree_type * target;
       switch (loop)
 	{
 	case 0: std::cout << "Testing plain construction" << std::endl;
@@ -110,6 +131,11 @@ int main()
 
 	case 2: std::cout << "Testing assign-construction" << std::endl;
 	  target = &assigned;
+	  break;
+
+   default:
+	case 4: std::cout << "Testing efficient-replace-and-optimise" << std::endl;
+	  target = &eff_repl;
 	  break;
 	}
       tree_type & t = *target;

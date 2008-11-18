@@ -135,8 +135,18 @@ namespace KDTree
 	   _M_acc(__x._M_acc), _M_cmp(__x._M_cmp), _M_dist(__x._M_dist)
       {
          _M_empty_initialise();
-         this->insert(begin(), __x.begin(), __x.end());
-         this->optimise();
+         // this is slow:
+         // this->insert(begin(), __x.begin(), __x.end());
+         // this->optimise();
+
+         // this is much faster, as it skips a lot of useless work
+         // do the optimisation before inserting
+         // Needs to be stored in a vector first as _M_optimise()
+         // sorts the data in the passed iterators directly.
+         std::vector<value_type> temp;
+         temp.reserve(__x.size());
+         std::copy(__x.begin(),__x.end(),std::back_inserter(temp));
+         _M_optimise(temp.begin(), temp.end(), 0);
       }
 
       template<typename _InputIterator>
@@ -147,21 +157,65 @@ namespace KDTree
 	  _M_acc(acc), _M_cmp(__cmp), _M_dist(__dist)
       {
          _M_empty_initialise();
-         this->insert(begin(), __first, __last);
-         this->optimise();
+         // this is slow:
+         // this->insert(begin(), __first, __last);
+         // this->optimise();
+
+         // this is much faster, as it skips a lot of useless work
+         // do the optimisation before inserting
+         // Needs to be stored in a vector first as _M_optimise()
+         // sorts the data in the passed iterators directly.
+         std::vector<value_type> temp;
+         temp.reserve(std::distance(__first,__last));
+         std::copy(__first,__last,std::back_inserter(temp));
+         _M_optimise(temp.begin(), temp.end(), 0);
+
+         // NOTE: this will BREAK users that are passing in
+         // read-once data via the iterator...
+         // We increment __first all the way to __last once within
+         // the distance() call, and again within the copy() call.
+         //
+         // This should end up using some funky C++ concepts or 
+         // type traits to check that the iterators can be used in this way...
       }
+
+
+      // this will CLEAR the tree and fill it with the contents
+      // of 'writable_vector'.  it will use the passed vector directly,
+      // and will basically resort the vector many times over while
+      // optimising the tree.
+      //
+      // Paul: I use this when I have already built up a vector of data
+      // that I want to add, and I don't mind if its contents get shuffled
+      // by the kdtree optimise routine.
+      void efficient_replace_and_optimise( std::vector<value_type> & writable_vector )
+      {
+         this->clear();
+         _M_optimise(writable_vector.begin(), writable_vector.end(), 0);
+      }
+
+
 
       KDTree&
       operator=(const KDTree& __x)
       {
 	if (this != &__x)
 	  {
-            this->clear();
 	    _M_acc = __x._M_acc;
 	    _M_dist = __x._M_dist;
 	    _M_cmp = __x._M_cmp;
-            this->insert(begin(),__x.begin(),__x.end());
-            this->optimize();
+         // this is slow:
+         // this->insert(begin(), __x.begin(), __x.end());
+         // this->optimise();
+
+         // this is much faster, as it skips a lot of useless work
+         // do the optimisation before inserting
+         // Needs to be stored in a vector first as _M_optimise()
+         // sorts the data in the passed iterators directly.
+         std::vector<value_type> temp;
+         temp.reserve(__x.size());
+         std::copy(__x.begin(),__x.end(),std::back_inserter(temp));
+         efficient_replace_and_optimise(temp);
 	  }
 	return *this;
       }
