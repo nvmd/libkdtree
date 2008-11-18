@@ -1097,8 +1097,8 @@ namespace KDTree
       {
         if (__A == __B) return;
         _Node_compare_ compare(__L % __K, _M_acc, _M_cmp);
-        std::sort(__A, __B, compare);
         _Iter __m = __A + (__B - __A) / 2;
+        std::nth_element(__A, __m, __B, compare);
         this->insert(*__m);
         if (__m != __A) _M_optimise(__A, __m, __L+1);
         if (++__m != __B) _M_optimise(__m, __B, __L+1);
