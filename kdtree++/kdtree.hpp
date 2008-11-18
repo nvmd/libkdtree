@@ -781,13 +781,13 @@ namespace KDTree
         if (_S_left(node.first))
           {
             Result left = _M_get_j_min(Result(_S_left(node.first), node.second), level+1);
-            if (compare(left.first, candidate.first))
+            if (compare(left.first->_M_value, candidate.first->_M_value))
                 candidate = left;
           }
         if (_S_right(node.first))
           {
             Result right = _M_get_j_min( Result(_S_right(node.first),node.second), level+1);
-            if (compare(right.first, candidate.first))
+            if (compare(right.first->_M_value, candidate.first->_M_value))
                 candidate = right;
           }
         if (candidate.first == node.first)
@@ -811,13 +811,13 @@ namespace KDTree
         if (_S_left(node.first))
           {
             Result left = _M_get_j_max( Result(_S_left(node.first),node.second), level+1);
-            if (compare(candidate.first, left.first))
+            if (compare(candidate.first->_M_value, left.first->_M_value))
                 candidate = left;
           }
         if (_S_right(node.first))
           {
             Result right = _M_get_j_max(Result(_S_right(node.first),node.second), level+1);
-            if (compare(candidate.first, right.first))
+            if (compare(candidate.first->_M_value, right.first->_M_value))
                 candidate = right;
           }
 
