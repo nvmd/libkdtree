@@ -512,8 +512,8 @@ namespace KDTree
 	      std::pair<size_type, typename _Acc::result_type> >
 	      best = _S_node_nearest (__K, 0, __val,
 				      _M_get_root(), &_M_header, _M_get_root(),
-				      _S_accumulate_node_distance
-				      (__K, _M_dist, _M_acc, _M_get_root()->_M_value, __val),
+				      sqrt(_S_accumulate_node_distance
+				      (__K, _M_dist, _M_acc, _M_get_root()->_M_value, __val)),
 				      _M_cmp, _M_acc, _M_dist,
 				      always_true<value_type>());
 	    return std::pair<const_iterator, distance_type>
@@ -531,8 +531,8 @@ namespace KDTree
         bool root_is_candidate = false;
 	    const _Node<_Val>* node = _M_get_root();
        { // scope to ensure we don't use 'root_dist' anywhere else
-	    distance_type root_dist =_S_accumulate_node_distance
-	      (__K, _M_dist, _M_acc, _M_get_root()->_M_value, __val);
+	    distance_type root_dist = sqrt(_S_accumulate_node_distance
+	      (__K, _M_dist, _M_acc, _M_get_root()->_M_value, __val));
 	    if (root_dist <= __max)
 	      {
             root_is_candidate = true;
@@ -564,8 +564,8 @@ namespace KDTree
 	    if (__p(_M_get_root()->_M_value))
 	      {
             { // scope to ensure we don't use root_dist anywhere else
-	    distance_type root_dist = _S_accumulate_node_distance
-		  (__K, _M_dist, _M_acc, _M_get_root()->_M_value, __val);
+	    distance_type root_dist = sqrt(_S_accumulate_node_distance
+		  (__K, _M_dist, _M_acc, _M_get_root()->_M_value, __val));
 		if (root_dist <= __max)
 		  {
            root_is_candidate = true;
@@ -1014,81 +1014,6 @@ namespace KDTree
           return out;
         }
 
-        // quick little power function
-        // next-best is __gnu_cxx::power
-        // std::pow() is probably not ideal for simple powers. I forget exact details...
-        distance_type _M_square( distance_type x ) const { return x*x; }
-
-       // WARNING: Calculates and RETURNS dist^2 (for speed)
-       // NOTE: CENTER is a region of zero area.  It is the point we are aiming for.
-       //
-       // How it works: Starting with a centerpt (single-pt in a region, with a range
-       // attached to it), and bounds, it first calculates the distance to THIS node,
-       // and adjusts the center's range DOWN if its closer.  No point looking further
-       // than it needs to look.  A form of a dynamic find_within_range.
-       // It expands the bounds as usual and sees if it intersects the centerpt+range.
-       // And so it goes ...
-
-         template <class Predicate>
-         std::pair<const_iterator,distance_type>
-        _M_find_nearest( _Link_const_type __N, typename _Region_::_CenterPt __CENTER,
-                             _Region_ const& __BOUNDS,
-                             size_type const __L,
-                             Predicate predicate ) const
-        {
-           std::pair<const_iterator,distance_type> best(this->end(),__CENTER.second);
-
-           // we ignore this node if the predicate isn't true
-           if (predicate(*const_iterator(__N)))
-           {
-              distance_type dist = 0;
-              for ( size_type i = 0; i != __K; ++i )
-              {
-                 dist += _M_square( __CENTER.first._M_low_bounds[i] - _M_acc(_S_value(__N),i) );
-              }
-#ifdef KDTREE_CHECK_PERFORMANCE
-//              ++num_dist_calcs;
-#endif
-              dist = sqrt(dist);
-
-              best.first = __N;
-              best.second = dist;
-           }
-
-           // adjust our CENTER target
-           __CENTER.second = std::min(__CENTER.second,best.second);
-
-          if (_S_left(__N))
-            {
-              _Region_ __bounds(__BOUNDS);
-              __bounds.set_high_bound(_S_value(__N), __L);
-              if (__bounds.intersects_with(__CENTER))
-              {
-                 std::pair<const_iterator,distance_type> left =
-                    _M_find_nearest( _S_left(__N), __CENTER, __bounds, __L+1, predicate);
-                 // check if better than what I found
-                 if (left.second < best.second) best = left;
-              }
-            }
-
-           // adjust our center target (only useful if left found something closer)
-           __CENTER.second = std::min(__CENTER.second,best.second);
-
-          if (_S_right(__N))
-            {
-              _Region_ __bounds(__BOUNDS);
-              __bounds.set_low_bound(_S_value(__N), __L);
-              if (__bounds.intersects_with(__CENTER))
-              {
-                 std::pair<const_iterator,distance_type> right =
-                    _M_find_nearest( _S_right(__N), __CENTER, __bounds, __L+1, predicate);
-                 // check if better than what I found
-                 if (right.second < best.second) best = right;
-               }
-            }
-
-          return best;
-        }
 
       template <typename _Iter>
         void
