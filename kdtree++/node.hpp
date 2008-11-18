@@ -212,7 +212,11 @@ namespace KDTree
 	    typename _Dist::distance_type d = 0;
 	    for (size_t i=0; i < __k && d <= __max; ++i)
 	      d += _S_node_distance(i, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur)->_M_value);
-	    if (d < __max || ( d == __max && cur < __best ))
+	    if (d <= __max)
+          // ("bad candidate notes")
+          // Changed: removed this test: || ( d == __max && cur < __best ))
+          // Can't do this optimisation without checking that the current 'best' is not the root AND is not a valid candidate...
+          // This is because find_nearest() etc will call this function with the best set to _M_root EVEN IF _M_root is not a valid answer (eg too far away or doesn't pass the predicate test)
 	      {
 		__best = static_cast<const _Node<_Val>* >(cur);
 		__max = d;
@@ -265,7 +269,7 @@ namespace KDTree
 		    typename _Dist::distance_type d = 0;
 		    for (size_t i=0; i < __k && d <= __max; ++i)
 		      d += _S_node_distance(i, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)->_M_value);
-		    if (d < __max || ( d == __max && probe < __best ) )
+          if (d <= __max)  // CHANGED, see the above notes ("bad candidate notes")
 		      {
 			__best = static_cast<const _Node<_Val>* >(probe);
 			__max = d;

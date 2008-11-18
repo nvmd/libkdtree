@@ -42,6 +42,14 @@ struct triplet
     registered.erase(this);
   }
 
+  double distance_to(triplet const& x) const
+  {
+     double dist = 0;
+     for (int i = 0; i != 3; ++i)
+        dist += d[i]*x.d[i];
+     return sqrt(dist);
+  }
+
   inline value_type operator[](size_t const N) const { return d[N]; }
 
   value_type d[3];
@@ -78,6 +86,17 @@ struct FalsePredicate
 
 int main()
 {
+   // check that it'll find nodes exactly MAX away
+   {
+      tree_type exact_dist(std::ptr_fun(tac));
+        triplet c0(5, 4, 0);
+        exact_dist.insert(c0);
+        triplet target(6,4,0);
+
+      std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target,1);
+      assert(found.first != exact_dist.end());
+      std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << std::endl;
+   }
 
   tree_type src(std::ptr_fun(tac));
 
@@ -189,6 +208,29 @@ int main()
 
       std::cout << std::endl << t << std::endl;
 
+      // search for all the nodes at exactly 0 dist away
+      for (tree_type::const_iterator target = t.begin(); target != t.end(); ++target)
+      {
+         std::pair<tree_type::const_iterator,double> found = t.find_nearest(*target,0);
+         assert(found.first != t.end());
+         assert(*found.first == *target);
+         std::cout << "Test find_nearest(), found at exact distance away from " << *target << ", found " << *found.first << std::endl;
+      }
+
+      {
+         const double small_dist = 0.0001;
+         std::pair<tree_type::const_iterator,double> notfound = t.find_nearest(s,small_dist);
+         std::cout << "Test find_nearest(), nearest to " << s << " within " << small_dist << " should not be found" << std::endl;
+
+         if (notfound.first != t.end())
+         {
+            std::cout << "ERROR found a node at dist " << notfound.second << " : " << *notfound.first << std::endl;
+            std::cout << "Actual distance = " << s.distance_to(*notfound.first) << std::endl;
+         }
+
+         assert(notfound.first == t.end());
+      }
+
       {
          std::pair<tree_type::const_iterator,double> nif = t.find_nearest_if(s,std::numeric_limits<double>::max(),Predicate());
          std::cout << "Test find_nearest_if(), nearest to " << s << " @ " << nif.second << ": " << *nif.first << std::endl;
@@ -197,6 +239,9 @@ int main()
          std::cout << "Test find_nearest_if(), nearest to " << s << " should never be found (predicate too strong)" << std::endl;
          assert(cantfind.first == t.end());
       }
+
+
+
 
       std::cout << "Nearest to " << s << ": " <<
 	*t.find_nearest(s,std::numeric_limits<double>::max()).first << std::endl;
