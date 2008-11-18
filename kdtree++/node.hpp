@@ -365,18 +365,18 @@ namespace KDTree
     // Probe all node's children not visited yet (siblings of the visited nodes).
     const _Node_base* probe = cur;
     const _Node_base* pprobe = probe;
-    const _Node_base* near;
-    const _Node_base* far;
+    const _Node_base* near_node;
+    const _Node_base* far_node;
     size_t probe_dim = cur_dim;
     if (_S_node_compare(probe_dim % __k, __cmp, __acc, __val, static_cast<const _Node<_Val>* >(probe)))
-      near = probe->_M_right;
+      near_node = probe->_M_right;
     else
-      near = probe->_M_left;
-    if (near
+      near_node = probe->_M_left;
+    if (near_node
 	// only visit node's children if node's plane intersect hypersphere
 	&& (_S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max))
       {
-	probe = near;
+	probe = near_node;
 	++probe_dim;
       }
     while (cur != __end)
@@ -385,13 +385,13 @@ namespace KDTree
 	  {
 	    if (_S_node_compare(probe_dim % __k, __cmp, __acc, __val, static_cast<const _Node<_Val>* >(probe)))
 	      {
-		near = probe->_M_left;
-		far = probe->_M_right;
+		near_node = probe->_M_left;
+		far_node = probe->_M_right;
 	      }
 	    else
 	      {
-		near = probe->_M_right;
-		far = probe->_M_left;
+		near_node = probe->_M_right;
+		far_node = probe->_M_left;
 	      }
 	    if (pprobe == probe->_M_parent) // going downward ...
 	      {
@@ -408,16 +408,16 @@ namespace KDTree
 		      }
 		  }
 		pprobe = probe;
-		if (near)
+		if (near_node)
 		  {
-		    probe = near;
+		    probe = near_node;
 		    ++probe_dim;
 		  }
-		else if (far &&
+		else if (far_node &&
 			 // only visit node's children if node's plane intersect hypersphere
 			 _S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max)
 		  {
-		    probe = far;
+		    probe = far_node;
 		    ++probe_dim;
 		  }
 		else
@@ -428,12 +428,12 @@ namespace KDTree
 	      }
 	    else // ... and going upward.
 	      {
-		if (pprobe == near && far
+		if (pprobe == near_node && far_node
 		    // only visit node's children if node's plane intersect hypersphere
 		    && _S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max)
 		  {
 		    pprobe = probe;
-		    probe = far;
+		    probe = far_node;
 		    ++probe_dim;
 		  }
 		else
@@ -453,14 +453,14 @@ namespace KDTree
 	if (cur != __end)
 	  {
 	    if (pcur == cur->_M_left)
-	      near = cur->_M_right;
+	      near_node = cur->_M_right;
 	    else
-	      near = cur->_M_left;
-	    if (near
+	      near_node = cur->_M_left;
+	    if (near_node
 		// only visit node's children if node's plane intersect hypersphere
 		&& (_S_node_distance(cur_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur)) <= __max))
 	      {
-		probe = near;
+		probe = near_node;
 		++probe_dim;
 	      }
 	  }
