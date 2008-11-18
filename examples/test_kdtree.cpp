@@ -91,11 +91,37 @@ int main()
       tree_type exact_dist(std::ptr_fun(tac));
         triplet c0(5, 4, 0);
         exact_dist.insert(c0);
-        triplet target(6,4,0);
+        triplet target(7,4,0);
 
-      std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target,1);
+      std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target,2);
       assert(found.first != exact_dist.end());
+      assert(found.second == 2);
       std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << std::endl;
+   }
+
+   {
+      tree_type exact_dist(std::ptr_fun(tac));
+        triplet c0(5, 2, 0);
+        exact_dist.insert(c0);
+        triplet target(7,4,0);
+
+        // call find_nearest without a range value - it found a compile error earlier.
+      std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target);
+      assert(found.first != exact_dist.end());
+      std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << " @ " << found.second << " should be " << sqrt(8) << std::endl;
+      assert(found.second == sqrt(8));
+   }
+
+   {
+      tree_type exact_dist(std::ptr_fun(tac));
+        triplet c0(5, 2, 0);
+        exact_dist.insert(c0);
+        triplet target(7,4,0);
+
+      std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target,sqrt(8));
+      assert(found.first != exact_dist.end());
+      std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << " @ " << found.second << " should be " << sqrt(8) << std::endl;
+      assert(found.second == sqrt(8));
    }
 
   tree_type src(std::ptr_fun(tac));
