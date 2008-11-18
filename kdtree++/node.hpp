@@ -94,29 +94,8 @@ namespace KDTree
     class _Node_compare
     {
     public:
-      typedef _Node<_Val> const* _Link_const_type;
-
       _Node_compare(size_t const __DIM, _Acc const& acc, _Cmp const& cmp)
 	: _M_DIM(__DIM), _M_acc(acc), _M_cmp(cmp) {}
-
-      bool
-      operator()(_Link_const_type const& __A, _Link_const_type const& __B) const
-      {
-        return _M_cmp(_M_acc(__A->_M_value, _M_DIM),
-                      _M_acc(__B->_M_value, _M_DIM));
-      }
-
-      bool
-      operator()(_Link_const_type const& __A, _Val const& __B) const
-      {
-        return _M_cmp(_M_acc(__A->_M_value, _M_DIM), _M_acc(__B, _M_DIM));
-      }
-
-      bool
-      operator()(_Val const& __A, _Link_const_type const& __B) const
-      {
-        return _M_cmp(_M_acc(__A, _M_DIM), _M_acc(__B->_M_value, _M_DIM));
-      }
 
       bool
       operator()(_Val const& __A, _Val const& __B) const
@@ -136,48 +115,15 @@ namespace KDTree
       The comparison functor and the accessor are references to the template
       parameters of the KDTree.
    */
-  template <typename _Val, typename _Cmp,
+  template <typename _ValA, typename _ValB, typename _Cmp,
 	    typename _Acc>
   inline
   bool
   _S_node_compare (const size_t __dim,
 		   const _Cmp& __cmp, const _Acc& __acc,
-		   const _Val& __a, const _Val& __b)
+		   const _ValA& __a, const _ValB& __b)
   {
     return __cmp(__acc(__a, __dim), __acc(__b, __dim));
-  }
-
-  template <typename _Val, typename _Cmp,
-	    typename _Acc>
-  inline
-  bool
-  _S_node_compare (const size_t __dim,
-		   const _Cmp& __cmp, const _Acc& __acc,
-		   const _Val& __a, const _Node<_Val>* __b)
-  {
-    return __cmp(__acc(__a, __dim), __acc(__b->_M_value, __dim));
-  }
-
-  template <typename _Val, typename _Cmp,
-	    typename _Acc>
-  inline
-  bool
-  _S_node_compare (const size_t __dim,
-		   const _Cmp& __cmp, const _Acc& __acc,
-		   const _Node<_Val>* __a, const _Val& __b)
-  {
-    return __cmp(__acc(__a->_M_value, __dim), __acc(__b, __dim));
-  }
-
-  template <typename _Val, typename _Cmp,
-	    typename _Acc>
-  inline
-  bool
-  _S_node_compare (const size_t __dim,
-		   const _Cmp& __cmp, const _Acc& __acc,
-		   const _Node<_Val>* __a, const _Node<_Val>* __b)
-  {
-    return __cmp(__acc(__a->_M_value, __dim), __acc(__b->_M_value, __dim));
   }
 
   /*! Compute the distance between two values for one dimension only.
@@ -185,48 +131,15 @@ namespace KDTree
       The distance functor and the accessor are references to the template
       parameters of the KDTree.
    */
-  template <typename _Val, typename _Dist,
+  template <typename _ValA, typename _ValB, typename _Dist,
 	    typename _Acc>
   inline
   typename _Dist::distance_type
   _S_node_distance (const size_t __dim,
 		    const _Dist& __dist, const _Acc& __acc,
-		    const _Val& __a, const _Val& __b)
+		    const _ValA& __a, const _ValB& __b)
   {
     return __dist(__acc(__a, __dim), __acc(__b, __dim));
-  }
-
-  template <typename _Val, typename _Dist,
-	    typename _Acc>
-  inline
-  typename _Dist::distance_type
-  _S_node_distance (const size_t __dim,
-		    const _Dist& __dist, const _Acc& __acc,
-		    const _Val& __a, const _Node<_Val>* __b)
-  {
-    return __dist(__acc(__a, __dim), __acc(__b->_M_value, __dim));
-  }
-
-  template <typename _Val, typename _Dist,
-	    typename _Acc>
-  inline
-  typename _Dist::distance_type
-  _S_node_distance (const size_t __dim,
-		    const _Dist& __dist, const _Acc& __acc,
-		    const _Node<_Val>* __a, const _Val& __b)
-  {
-    return __dist(__acc(__a->_M_value, __dim), __acc(__b, __dim));
-  }
-
-  template <typename _Val, typename _Dist,
-	    typename _Acc>
-  inline
-  typename _Dist::distance_type
-  _S_node_distance (const size_t __dim,
-		    const _Dist& __dist, const _Acc& __acc,
-		    const _Node<_Val>* __a, const _Node<_Val>* __b)
-  {
-    return __dist(__acc(__a->_M_value, __dim), __acc(__b->_M_value, __dim));
   }
 
   /*! Compute the distance between two values and accumulate the result for all
@@ -235,62 +148,17 @@ namespace KDTree
       The distance functor and the accessor are references to the template
       parameters of the KDTree.
    */
-  template <typename _Val, typename _Dist,
+  template <typename _ValA, typename _ValB, typename _Dist,
 	    typename _Acc>
   inline
   typename _Dist::distance_type
   _S_accumulate_node_distance (const size_t __dim,
 			       const _Dist& __dist, const _Acc& __acc,
-			       const _Val& __a, const _Val& __b)
+			       const _ValA& __a, const _ValB& __b)
   {
     typename _Dist::distance_type d = 0;
     for (size_t i=0; i<__dim; ++i)
       d += __dist(__acc(__a, i), __acc(__b, i));
-    return d;
-  }
-
-  template <typename _Val, typename _Dist,
-	    typename _Acc>
-  inline
-  typename _Dist::distance_type
-  _S_accumulate_node_distance (const size_t __dim,
-			       const _Dist& __dist, const _Acc& __acc,
-			       const _Val& __a,
-			       const _Node<_Val>* __b)
-  {
-    typename _Dist::distance_type d = 0;
-    for (size_t i=0; i<__dim; ++i)
-      d += __dist(__acc(__a, i), __acc(__b->_M_value, i));
-    return d;
-  }
-
-  template <typename _Val, typename _Dist,
-	    typename _Acc>
-  inline
-  typename _Dist::distance_type
-  _S_accumulate_node_distance (const size_t __dim,
-			       const _Dist& __dist, const _Acc& __acc,
-			       const _Node<_Val>* __a,
-			       const _Val& __b)
-  {
-    typename _Dist::distance_type d = 0;
-    for (size_t i=0; i<__dim; ++i)
-      d += __dist(__acc(__a->_M_value, i), __acc(__b, i));
-    return d;
-  }
-
-  template <typename _Val, typename _Dist,
-	    typename _Acc>
-  inline
-  typename _Dist::distance_type
-  _S_accumulate_node_distance (const size_t __dim,
-			       const _Dist& __dist, const _Acc& __acc,
-			       const _Node<_Val>* __a,
-			       const _Node<_Val>* __b)
-  {
-    typename _Dist::distance_type d = 0;
-    for (size_t i=0; i<__dim; ++i)
-      d += __dist(__acc(__a->_M_value, i), __acc(__b->_M_value, i));
     return d;
   }
 
@@ -306,7 +174,7 @@ namespace KDTree
 		   const _Cmp& __cmp, const _Acc& __acc,
 		   const _Val& __val, const _Node_base* __node)
   {
-    if (_S_node_compare(__dim, __cmp, __acc, __val,  static_cast<const _Node<_Val>* >(__node)))
+    if (_S_node_compare(__dim, __cmp, __acc, __val,  static_cast<const _Node<_Val>* >(__node)->_M_value))
       return __node->_M_left;
     else
       return __node->_M_right;
@@ -320,13 +188,14 @@ namespace KDTree
     \return the nearest node of __end node if no nearest node was found for the
     given arguments.
    */
-  template <typename _Val, typename _Cmp,
-	    typename _Acc, typename _Dist,
-	    typename _Predicate>
+  template <class SearchVal,
+           typename _Val, typename _Cmp,
+           typename _Acc, typename _Dist,
+           typename _Predicate>
   inline
   std::pair<const _Node<_Val>*,
 	    std::pair<size_t, typename _Dist::distance_type> >
-  _S_node_nearest (const size_t __k, size_t __dim, const _Val& __val,
+  _S_node_nearest (const size_t __k, size_t __dim, SearchVal const& __val,
 		   const _Node<_Val>* __node, const _Node_base* __end,
 		   const _Node<_Val>* __best, typename _Dist::distance_type __max,
 		   const _Cmp& __cmp, const _Acc& __acc, const _Dist& __dist,
@@ -342,7 +211,7 @@ namespace KDTree
 	  {
 	    typename _Dist::distance_type d = 0;
 	    for (size_t i=0; i < __k && d <= __max; ++i)
-	      d += _S_node_distance(i, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur));
+	      d += _S_node_distance(i, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur)->_M_value);
 	    if (d < __max || ( d == __max && cur < __best ))
 	      {
 		__best = static_cast<const _Node<_Val>* >(cur);
@@ -364,13 +233,13 @@ namespace KDTree
     const _Node_base* near;
     const _Node_base* far;
     size_t probe_dim = cur_dim;
-    if (_S_node_compare(probe_dim % __k, __cmp, __acc, __val, static_cast<const _Node<_Val>* >(probe)))
+    if (_S_node_compare(probe_dim % __k, __cmp, __acc, __val, static_cast<const _Node<_Val>* >(probe)->_M_value))
       near = probe->_M_right;
     else
       near = probe->_M_left;
     if (near
 	// only visit node's children if node's plane intersect hypersphere
-	&& (_S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max))
+	&& (_S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)->_M_value) <= __max))
       {
 	probe = near;
 	++probe_dim;
@@ -379,7 +248,7 @@ namespace KDTree
       {
 	while (probe != cur)
 	  {
-	    if (_S_node_compare(probe_dim % __k, __cmp, __acc, __val, static_cast<const _Node<_Val>* >(probe)))
+	    if (_S_node_compare(probe_dim % __k, __cmp, __acc, __val, static_cast<const _Node<_Val>* >(probe)->_M_value))
 	      {
 		near = probe->_M_left;
 		far = probe->_M_right;
@@ -395,7 +264,7 @@ namespace KDTree
 		  {
 		    typename _Dist::distance_type d = 0;
 		    for (size_t i=0; i < __k && d <= __max; ++i)
-		      d += _S_node_distance(i, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe));
+		      d += _S_node_distance(i, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)->_M_value);
 		    if (d < __max || ( d == __max && probe < __best ) )
 		      {
 			__best = static_cast<const _Node<_Val>* >(probe);
@@ -411,7 +280,7 @@ namespace KDTree
 		  }
 		else if (far &&
 			 // only visit node's children if node's plane intersect hypersphere
-			 _S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max)
+			 _S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)->_M_value) <= __max)
 		  {
 		    probe = far;
 		    ++probe_dim;
@@ -426,7 +295,7 @@ namespace KDTree
 	      {
 		if (pprobe == near && far
 		    // only visit node's children if node's plane intersect hypersphere
-		    && _S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max)
+		    && _S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)->_M_value) <= __max)
 		  {
 		    pprobe = probe;
 		    probe = far;
@@ -454,7 +323,7 @@ namespace KDTree
 	      near = cur->_M_left;
 	    if (near
 		// only visit node's children if node's plane intersect hypersphere
-		&& (_S_node_distance(cur_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur)) <= __max))
+		&& (_S_node_distance(cur_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur)->_M_value) <= __max))
 	      {
 		probe = near;
 		++probe_dim;
