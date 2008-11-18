@@ -554,7 +554,7 @@ namespace KDTree
 	  {
 	    const _Node<_Val>* node = _M_get_root();
 	    distance_type max = __max;
-	    if (__p(_M_get_root()))
+	    if (__p(_M_get_root()->_M_value))
 	      {
 		node = _M_get_root();
 		max =_S_accumulate_node_distance
