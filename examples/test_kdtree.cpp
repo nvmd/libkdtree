@@ -62,6 +62,14 @@ inline double tac( triplet t, size_t k ) { return t[k]; }
 
 typedef KDTree::KDTree<3, triplet, std::pointer_to_binary_function<triplet,size_t,double> > tree_type;
 
+struct Predicate
+{
+   bool operator()( triplet const& t ) const
+   {
+      return t[0] > 3;  // anything, we are currently testing that it compiles.
+   }
+};
+
 int main()
 {
 
@@ -174,6 +182,9 @@ int main()
       std::cout << "\n" << std::endl;
 
       std::cout << std::endl << t << std::endl;
+
+      std::cout << "Test find_nearest_if(), nearest to " << s << ": " <<
+	*t.find_nearest_if(s,std::numeric_limits<double>::max(),Predicate()).first << std::endl;
 
       std::cout << "Nearest to " << s << ": " <<
 	*t.find_nearest(s,std::numeric_limits<double>::max()).first << std::endl;
