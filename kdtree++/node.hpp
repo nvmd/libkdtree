@@ -239,7 +239,7 @@ namespace KDTree
     const _Node_base* far_node;
     size_t probe_dim = cur_dim;
     if (_S_node_compare(probe_dim % __k, __cmp, __acc, __val, static_cast<const _Node<_Val>* >(probe)->_M_value))
-      near_near = probe->_M_right;
+      near_node = probe->_M_right;
     else
       near_node = probe->_M_left;
     if (near_node
