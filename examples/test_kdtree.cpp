@@ -70,6 +70,12 @@ struct Predicate
    }
 };
 
+// never finds anything
+struct FalsePredicate
+{
+   bool operator()( triplet const& t ) const { return false; }
+};
+
 int main()
 {
 
@@ -183,8 +189,14 @@ int main()
 
       std::cout << std::endl << t << std::endl;
 
-      std::cout << "Test find_nearest_if(), nearest to " << s << ": " <<
-	*t.find_nearest_if(s,std::numeric_limits<double>::max(),Predicate()).first << std::endl;
+      {
+         std::pair<tree_type::const_iterator,double> nif = t.find_nearest_if(s,std::numeric_limits<double>::max(),Predicate());
+         std::cout << "Test find_nearest_if(), nearest to " << s << " @ " << nif.second << ": " << *nif.first << std::endl;
+
+         std::pair<tree_type::const_iterator,double> cantfind = t.find_nearest_if(s,std::numeric_limits<double>::max(),FalsePredicate());
+         std::cout << "Test find_nearest_if(), nearest to " << s << " should never be found (predicate too strong)" << std::endl;
+         assert(cantfind.first == t.end());
+      }
 
       std::cout << "Nearest to " << s << ": " <<
 	*t.find_nearest(s,std::numeric_limits<double>::max()).first << std::endl;
