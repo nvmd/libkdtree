@@ -46,7 +46,7 @@ struct triplet
   {
      double dist = 0;
      for (int i = 0; i != 3; ++i)
-        dist += d[i]*x.d[i];
+        dist += (d[i]-x.d[i])*(d[i]-x.d[i]);
      return sqrt(dist);
   }
 
@@ -243,12 +243,20 @@ int main()
 
 
 
-      std::cout << "Nearest to " << s << ": " <<
-	*t.find_nearest(s,std::numeric_limits<double>::max()).first << std::endl;
+      {
+      std::pair<tree_type::const_iterator,double> found = t.find_nearest(s,std::numeric_limits<double>::max());
+      std::cout << "Nearest to " << s << " @ " << found.second << " " << *found.first << std::endl;
+      std::cout << "Should be " << found.first->distance_to(s) << std::endl;
+      assert(found.second == found.first->distance_to(s));
+      }
 
+      {
       triplet s2(10, 10, 2);
-      std::cout << "Nearest to " << s2 << ": " <<
-	*t.find_nearest(s2,std::numeric_limits<double>::max()).first << std::endl;
+      std::pair<tree_type::const_iterator,double> found = t.find_nearest(s2,std::numeric_limits<double>::max());
+      std::cout << "Nearest to " << s2 << " @ " << found.second << " " << *found.first << std::endl;
+      std::cout << "Should be " << found.first->distance_to(s2) << std::endl;
+      assert(found.second == found.first->distance_to(s2));
+      }
 
       std::cout << std::endl;
 
