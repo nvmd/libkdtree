@@ -86,6 +86,17 @@ struct FalsePredicate
 
 int main()
 {
+   // check that it'll find nodes exactly MAX away
+   {
+      tree_type exact_dist(std::ptr_fun(tac));
+        triplet c0(5, 4, 0);
+        exact_dist.insert(c0);
+        triplet target(6,4,0);
+
+      std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target,1);
+      assert(found.first != exact_dist.end());
+      std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << std::endl;
+   }
 
   tree_type src(std::ptr_fun(tac));
 
@@ -197,6 +208,14 @@ int main()
 
       std::cout << std::endl << t << std::endl;
 
+      // search for all the nodes at exactly 0 dist away
+      for (tree_type::const_iterator target = t.begin(); target != t.end(); ++target)
+      {
+         std::pair<tree_type::const_iterator,double> found = t.find_nearest(*target,0);
+         assert(found.first != t.end());
+         assert(*found.first == *target);
+         std::cout << "Test find_nearest(), found at exact distance away from " << *target << ", found " << *found.first << std::endl;
+      }
 
       {
          const double small_dist = 0.0001;
@@ -220,6 +239,9 @@ int main()
          std::cout << "Test find_nearest_if(), nearest to " << s << " should never be found (predicate too strong)" << std::endl;
          assert(cantfind.first == t.end());
       }
+
+
+
 
       std::cout << "Nearest to " << s << ": " <<
 	*t.find_nearest(s,std::numeric_limits<double>::max()).first << std::endl;
