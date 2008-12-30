@@ -1,6 +1,33 @@
 libkdtree++ ChangeLog
 =====================
 
+2008-12-30  Paul Harris <paulharris@computer.org>
+
+	- New function: efficient_replace_and_optimise().
+	  Yes, its a long name. Sylvain doesn't like it.
+	  The reason for the long name is that it is a dangerous function,
+	  and it will resort whatever vector<> of data that you pass it.
+	  So I wanted the user to really know what they were doing before
+	  they called this function.
+	- Now calls sqrt() when required in order to search for items
+	  in 'real' distance units... And so it will accept and return distance
+	  in 'real' units (as opposed to squared units).
+	  This is not an ideal solution, we have all sorts of ideas to improve
+	  kdtree which will include less calls to sqrt() for more speed, and
+	  the ability to change the standard euclidean distance measurements
+	  for distance-on-a-sphere or whatever the user wants.
+	- Changed from using std::sort() to std::nth_element() when optimising
+	  the tree. Performance boost.
+	- Added lots of tests to check that the find functions are working
+	  correctly when fed edge-cases, including:
+	  - Items that are exactly 'max' distance away from the target.
+	  - When there are no value items to find.
+	- Templated the find functions so that the target/center point can be
+	  anything that can be accessed via the Accessor.
+	- Fixes to make it compile.
+
+	- And, a Python wrapper !   See README.Python
+
 2008-11-17  Sylvain Bougerel  <sylvain.bougerel@asia.thalesgroup.com>
 
 	- The version number of the library is now part of the headers.
