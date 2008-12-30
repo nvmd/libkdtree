@@ -1,5 +1,8 @@
 #define KDTREE_DEFINE_OSTREAM_OPERATORS
 
+// Make SURE all our asserts() are checked
+#undef NDEBUG
+
 #include <kdtree++/kdtree.hpp>
 
 #include <iostream>
@@ -273,7 +276,9 @@ int main()
       std::pair<tree_type::const_iterator,double> found = t.find_nearest(s,std::numeric_limits<double>::max());
       std::cout << "Nearest to " << s << " @ " << found.second << " " << *found.first << std::endl;
       std::cout << "Should be " << found.first->distance_to(s) << std::endl;
-      assert(found.second == found.first->distance_to(s));
+      // NOTE: the assert does not check for an exact match, as it is not exact when -O2 or -O3 is
+      // switched on.  Some sort of optimisation makes the math inexact.
+      assert( fabs(found.second - found.first->distance_to(s)) < std::numeric_limits<double>::epsilon() );
       }
 
       {
@@ -281,7 +286,9 @@ int main()
       std::pair<tree_type::const_iterator,double> found = t.find_nearest(s2,std::numeric_limits<double>::max());
       std::cout << "Nearest to " << s2 << " @ " << found.second << " " << *found.first << std::endl;
       std::cout << "Should be " << found.first->distance_to(s2) << std::endl;
-      assert(found.second == found.first->distance_to(s2));
+      // NOTE: the assert does not check for an exact match, as it is not exact when -O2 or -O3 is
+      // switched on.  Some sort of optimisation makes the math inexact.
+      assert( fabs(found.second - found.first->distance_to(s2)) < std::numeric_limits<double>::epsilon() );
       }
 
       std::cout << std::endl;
