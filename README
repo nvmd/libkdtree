@@ -68,6 +68,30 @@ As there is no need to compile any files, you can just:
 $ ./configure
 $ sudo make install
 
+
+It now also supports cmake, which can be used to build the examples
+and tests.
+To build with cmake, do an out-of-source build like so:
+
+# ASSUMING you have decompressed it into a directory called libkdtree,
+# and you are currently in that directory...
+
+$ cd ..  # go up, out of the kdtree source directory
+$ mkdir build
+$ cd build
+$ cmake ../libkdtree
+$ make
+
+
+You can use cmake to build the tests and examples on Windows with
+Visual C++.  Use the windows cmake to create a Visual C++ solution and
+build that.
+
+Note that cmake and ./configure is not needed at all in order to use
+kdtree in your application.  As kdtree is a header-only library, you
+just need to #include the kdtree.hpp
+
+
 Read the following to make use of the library.
 
 Usage
@@ -76,7 +100,8 @@ Usage
 A simple example program is provided in the ./examples directory
 (/usr/share/doc/libkdtree++-dev/examples on Debian).
 
-The library supports pkg-config. Thus, to compile with the library,
+For those using the ./configure system, the library supports pkg-config.
+Thus, to compile with the library,
 
   #include <kdtree++/kdtree.hpp>
 
@@ -89,5 +114,8 @@ the tree (this includes erase(value) calls, which search the tree).
 
 It is ok to call insert(value) many times and optimize() at the end, but 
 every erase() call should be followed with optimize().
+
+These notes are a bit out of date, please check the webpage and mailing list
+for more info.  Documentation is on the TODO list.
 
 Have fun.
