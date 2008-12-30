@@ -53,12 +53,12 @@
 //  KDTREE_VERSION % 100 is the patch level
 //  KDTREE_VERSION / 100 % 1000 is the minor version
 //  KDTREE_VERSION / 100000 is the major version
-#define KDTREE_VERSION 603
+#define KDTREE_VERSION 700
 //
 //  KDTREE_LIB_VERSION must be defined to be the same as KDTREE_VERSION
 //  but as a *string* in the form "x_y[_z]" where x is the major version
 //  number, y is the minor version number, and z is the patch level if not 0.
-#define KDTREE_LIB_VERSION "0_6_3"
+#define KDTREE_LIB_VERSION "0_7_0"
 
 
 #include <vector>
