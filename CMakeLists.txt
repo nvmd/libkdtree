@@ -1,6 +1,8 @@
 project (libkdtree CXX)
 cmake_minimum_required (VERSION 2.6.0)
 
+option (BUILD_PYTHON_BINDINGS "Build Python bindings (requires SWIG)")
+
 if (WIN32)
 
    # Maximum warning level
@@ -22,6 +24,14 @@ else (WIN32)
 
 endif (WIN32)
 
+if (BUILD_PYTHON_BINDINGS)
+   add_subdirectory (python-bindings)
+endif (BUILD_PYTHON_BINDINGS)
+
 include_directories (${PROJECT_SOURCE_DIR})
 
 add_subdirectory(examples)
+
+file (GLOB KDTREE_HEADERS kdtree++/*.hpp)
+install (FILES ${KDTREE_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+

@@ -28,6 +28,11 @@ libkdtree++ ChangeLog
 
 	- And, a Python wrapper !   See README.Python
 
+	- CMake support now can build the python wrapper and install the headers
+	  and the python wrapper to a destination folder.  Its simple, but neat.
+	  Does not install python module into the python site packages or anything
+	  like that.
+
 2008-11-17  Sylvain Bougerel  <sylvain.bougerel@asia.thalesgroup.com>
 
 	- The version number of the library is now part of the headers.

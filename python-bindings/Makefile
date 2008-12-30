@@ -36,7 +36,7 @@ _kdtree.so: py-kdtree_wrap.cxx
 	$(CXX) $(CPPFLAGS) -shared  py-kdtree_wrap.o $(LDLIBS) -o _kdtree.so
 
 clean:
-	rm -f test_kdtree *.so py-kdtree_wrap.cxx *.o dkdtree.py py-kdtree_test kdtree.py *.pyc
+	rm -f test_kdtree *.so py-kdtree_wrap.cxx *.o py-kdtree_test kdtree.py *.pyc
 
 .PHONY: clean
 
