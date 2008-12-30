@@ -12,6 +12,7 @@
 #endif
 
 #include <cstddef>
+#include <cmath>
 
 namespace KDTree
 {
