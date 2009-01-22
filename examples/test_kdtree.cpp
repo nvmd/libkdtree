@@ -5,6 +5,7 @@
 
 #include <kdtree++/kdtree.hpp>
 
+#include <deque>
 #include <iostream>
 #include <vector>
 #include <limits>
@@ -322,6 +323,35 @@ int main()
 	assert(backwards == forwards);
       }
     }
+
+
+  // Walter reported that the find_within_range() wasn't giving results that were within
+  // the specified range... this is the test.
+  {
+     tree_type tree(std::ptr_fun(tac));
+     tree.insert( triplet(28.771200,16.921600,-2.665970) );
+     tree.insert( triplet(28.553101,18.649700,-2.155560) );
+     tree.insert( triplet(28.107500,20.341400,-1.188940) );
+     tree.optimise();
+
+     std::deque< triplet > vectors;
+     triplet sv(18.892500,20.341400,-1.188940);
+     tree.find_within_range(sv, 10.0f, std::back_inserter(vectors));
+
+     std::cout << std::endl << "Test find_with_range( " << sv << ", 10.0f) found " << vectors.size() << " candidates." << std::endl;
+
+     // double-check the ranges
+     for (std::deque<triplet>::iterator v = vectors.begin(); v != vectors.end(); ++v)
+     {
+        double dist = sv.distance_to(*v);
+        std::cout << "  " << *v << " dist=" << dist << std::endl;
+        if (dist > 10.0f)
+           std::cout << "    This point is too far! But that is by design, its within a 'box' with a 'radius' of 10, not a sphere with a radius of 10" << std::endl;
+        // Not a valid test, it can be greater than 10 if the point is in the corners of the box.
+        // assert(dist <= 10.0f);
+     }
+  }
+
 
   return 0;
 }
