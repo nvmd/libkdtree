@@ -9,6 +9,7 @@
 #define INCLUDE_KDTREE_ACCESSOR_HPP
 
 #include <cstddef>
+#include <cmath>
 
 namespace KDTree
 {
@@ -30,45 +31,45 @@ namespace KDTree
     bool operator() (const _Tp& ) const { return true; }
   };
 
-  template <typename _Tp, typename _Dist>
-  struct squared_difference
+  /**
+   *  @brief functor that calculates a distance between 2 vector (in
+   *  mathematical sense) using an euclidean metric in a way that avoids
+   *  overflow.
+   *
+   *  The function works using double in the backend, so TypeDistance must be
+   *  castable into a double and vice-versa.
+   *
+   *  The template types V1 and V2 are used by the tree to pass 2 vectors for
+   *  which the operator[] is defined. This operator can be uses to get the
+   *  vector's element for a particular dimension.
+   */
+  typename <typename TypeDistance>
+  struct euclidean_distance
   {
-    typedef _Dist distance_type;
+    typedef TypeDistance distance_type;
 
-    distance_type
-    operator() (const _Tp& __a, const _Tp& __b) const
+    typename <typename V1, typename V2>
+    distance_type distance(const V1& a, const V2& b, size_t d)
     {
-      distance_type d=__a - __b;
-      return d*d;
+      // first pass to determine max val
+      double w = 0.0;
+      for (size_t i=0; i<d; ++i)
+	{
+	  double c = fabs(static_cast<double>(a[i]-b[i]));
+	  if (c > w) { w = c }
+	}
+
+      if (w == 0.0) { return static_cast<distance_type>(0.0); }
+
+      // second pass to compute the distance
+      double r = 0.0;
+      for (size_t i=0; i<d; ++i)
+	{
+	  double x = fabs(static_cast<double>(a[i]-b[i])) / w;
+	  r += x * x;
+	}
+      return static_cast<distance_type>(w * sqrt(r));
     }
-  };
-
-  template <typename _Tp, typename _Dist>
-  struct squared_difference_counted
-  {
-    typedef _Dist distance_type;
-
-    squared_difference_counted()
-      : _M_count(0)
-    { }
-
-    void reset ()
-    { _M_count = 0; }
-
-    long&
-    count () const
-    { return _M_count; }
-
-    distance_type
-    operator() (const _Tp& __a, const _Tp& __b) const
-    {
-      distance_type d=__a - __b;
-      ++_M_count;
-      return d*d;
-    }
-
-  private:
-    mutable long _M_count;
   };
 
 } // namespace KDTree

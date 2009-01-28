@@ -180,6 +180,44 @@ namespace KDTree
     return __cmp(__acc(__a->_M_value, __dim), __acc(__b->_M_value, __dim));
   }
 
+  /**
+   *  Proxy to a value that embed the definition of the accessor and always
+   *  provide operator[] for the value.
+   */
+  template <typename _Val, typename _Acc>
+  struct value_proxy
+  {
+    const _Val& value;
+    const _Acc& accessor;
+
+    _Acc::result_type operator[] (size_t d)
+    {
+      return accessor(value, d);
+    }
+  };
+
+  /**
+   *  Similar to the above, except that the value being accessed is the result
+   *  of its projection of on an hyperplane orthogonal to a dimension
+   *  'projection_dim' and containing the value 'projection_value'.
+   */
+  template <typename _Val, typename _Acc>
+  struct projection_proxy
+  {
+    size_t projection_dim;
+    const _Val& projection_value;
+    const _Val& value;
+    const _Acc& accessor;
+
+    _Acc::result_type operator[] (size_t d)
+    {
+      if (d == projection_dim)
+	{ return accessor(value, d); }
+      else
+	{ return accessor(projection_value, d); }
+    }
+  };
+
   /*! Compute the distance between two values for one dimension only.
 
       The distance functor and the accessor are references to the template
@@ -193,7 +231,8 @@ namespace KDTree
 		    const _Dist& __dist, const _Acc& __acc,
 		    const _Val& __a, const _Val& __b)
   {
-    return __dist(__acc(__a, __dim), __acc(__b, __dim));
+    
+    return __dist.distance(__acc(__a, __dim), __acc(__b, __dim));
   }
 
   template <typename _Val, typename _Dist,

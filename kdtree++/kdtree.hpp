@@ -92,8 +92,7 @@ namespace KDTree
 
   template <size_t const __K, typename _Val,
             typename _Acc = _Bracket_accessor<_Val>,
-	    typename _Dist = squared_difference<typename _Acc::result_type,
-						typename _Acc::result_type>,
+	    typename _Dist = euclidean_distance<typename _Acc::result_type>,
             typename _Cmp = std::less<typename _Acc::result_type>,
             typename _Alloc = std::allocator<_Node<_Val> > >
     class KDTree : protected _Alloc_base<_Val, _Alloc>
