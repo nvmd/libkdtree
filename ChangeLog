@@ -1,6 +1,11 @@
 libkdtree++ ChangeLog
 =====================
 
+2009-02-10  Paul Harris <paulharris@computer.org>
+
+   - Bug fix: was incorrectly casting a pointer when the search key type
+	  was different to the stored type.
+
 2008-12-30  Paul Harris <paulharris@computer.org>
 
 	- New function: efficient_replace_and_optimise().
