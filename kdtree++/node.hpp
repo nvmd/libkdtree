@@ -43,6 +43,24 @@ namespace KDTree
       while (__x->_M_right) __x = __x->_M_right;
       return __x;
     }
+
+#ifdef KDTREE_DEFINE_OSTREAM_OPERATORS
+
+     template <typename Char, typename Traits>
+       friend
+       std::basic_ostream<Char, Traits>&
+       operator<<(typename std::basic_ostream<Char, Traits>& out,
+                  _Node_base const& node)
+       {
+         out << &node;
+         out << " parent: " << node._M_parent;
+         out << "; left: " << node._M_left;
+         out << "; right: " << node._M_right;
+         return out;
+       }
+
+#endif
+
   };
 
   template <typename _Val>
@@ -60,19 +78,6 @@ namespace KDTree
         : _Node_base(__PARENT, __LEFT, __RIGHT), _M_value(__VALUE) {}
 
 #ifdef KDTREE_DEFINE_OSTREAM_OPERATORS
-
-     template <typename Char, typename Traits>
-       friend
-       std::basic_ostream<Char, Traits>&
-       operator<<(typename std::basic_ostream<Char, Traits>& out,
-                  _Node_base const& node)
-       {
-         out << &node;
-         out << " parent: " << node._M_parent;
-         out << "; left: " << node._M_left;
-         out << "; right: " << node._M_right;
-         return out;
-       }
 
      template <typename Char, typename Traits>
        friend

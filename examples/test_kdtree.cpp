@@ -59,6 +59,25 @@ struct triplet
   value_type d[3];
 };
 
+
+
+// same as triplet, except with the values reversed.
+struct alternate_triplet
+{
+  typedef int value_type;
+
+  alternate_triplet(const triplet & x)
+  {
+    d[0] = x.d[2];
+    d[1] = x.d[1];
+    d[2] = x.d[0];
+  }
+
+  inline value_type operator[](size_t const N) const { return d[2-N]; }
+
+  value_type d[3];
+};
+
 inline bool operator==(triplet const& A, triplet const& B) {
   return A.d[0] == B.d[0] && A.d[1] == B.d[1] && A.d[2] == B.d[2];
 }
@@ -70,6 +89,15 @@ std::ostream& operator<<(std::ostream& out, triplet const& T)
 }
 
 inline double tac( triplet t, size_t k ) { return t[k]; }
+
+// use tac as a class instead of a function,
+// can access more than one type with just 1 definition.
+struct alternate_tac
+{
+   typedef double result_type;
+   double operator()( triplet const& t, size_t k ) const { return t[k]; }
+   double operator()( alternate_triplet const& t, size_t k ) const { return t[k]; }
+};
 
 
 typedef KDTree::KDTree<3, triplet, std::pointer_to_binary_function<triplet,size_t,double> > tree_type;
@@ -102,6 +130,31 @@ int main()
       assert(found.second == 2);
       std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << std::endl;
    }
+
+   // do the same test, except use alternate_triplet as the search key
+   {
+      // NOTE: stores triplet, but we search with alternate_triplet
+      typedef KDTree::KDTree<3, triplet, alternate_tac> alt_tree;
+
+      triplet actual_target(7,0,0);
+
+      alt_tree tree;
+      tree.insert( triplet(0, 0, 7) );
+      tree.insert( triplet(0, 0, 7) );
+      tree.insert( triplet(0, 0, 7) );
+      tree.insert( triplet(3, 0, 0) );
+      tree.insert( actual_target );
+      tree.optimise();
+
+      alternate_triplet target( actual_target );
+
+      std::pair<alt_tree::const_iterator,double> found = tree.find_nearest(target);
+      assert(found.first != tree.end());
+      std::cout << "Test with alternate search type, found: " << *found.first << ", wanted " << actual_target << std::endl;
+      assert(found.second == 0);
+      assert(*found.first == actual_target);
+   }
+
 
    {
       tree_type exact_dist(std::ptr_fun(tac));
