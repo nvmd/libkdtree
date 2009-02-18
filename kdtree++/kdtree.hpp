@@ -526,7 +526,7 @@ namespace KDTree
         bool root_is_candidate = false;
 	    const _Node<_Val>* node = _M_get_root();
        { // scope to ensure we don't use 'root_dist' anywhere else
-	    distance_type root_dist =_S_accumulate_node_distance
+	    distance_type root_dist =_S_node_dist
 	      (__K, _M_dist, _M_acc, _M_get_root(), __val);
 	    if (root_dist <= __max)
 	      {
@@ -559,7 +559,7 @@ namespace KDTree
 	    if (__p(_M_get_root()->_M_value))
 	      {
             { // scope to ensure we don't use root_dist anywhere else
-	    distance_type root_dist = _S_accumulate_node_distance
+	    distance_type root_dist = _S_node_dist
 		  (__K, _M_dist, _M_acc, _M_get_root(), __val);
 		if (root_dist <= __max)
 		  {

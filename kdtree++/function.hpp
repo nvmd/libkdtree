@@ -32,7 +32,77 @@ namespace KDTree
   };
 
   /**
-   *  @brief functor that calculates a distance between 2 vector (in
+   * @brief the following section defines distance calculation functors.
+   *
+   * The paragraph below will illustrate how a prototype distance calculator
+   * looks like and what it means. Then user can use either of the 2
+   * following distance calculation. By default, euclidean distance is used.
+   *
+   *  struct my_distance_calculator_name
+   *  {
+   *    typedef my_distance_type distance_type;
+   *    template<typename V1, typename V2>
+   *    distance_type distance(const V1& a, const V2& b, size_t dim) const;
+   *    template<typename V1, typename V2>
+   *    distance_type proj_distance(const V1& a, const V2& b,
+   *    			    size_t dim, size_t proj_dim) const;
+   *  };
+   *
+   *  The first declaration defines the type in which to express the distance,
+   *  this type will be returned to the user when making a nearest neighbor
+   *  search in the tree.
+   *
+   *  The second declaration define the distance between 2 element of the tree.
+   *  The types V1 and V2 are a wrapper around the element type of the tree
+   *  that always provides the braket accessor.
+   *
+   *  The third declaration is mostly similar to the second one. However the
+   *  result of the computation should be the distance that is computed between
+   *  the 2 elements as if they where projected on a specific dimension. The
+   *  dimension for the projection is given by proj_dim.
+   *
+   *  A distance functor declared in such way can be used to compute orthogonal
+   *  distances, manhanttan distances, euclidean distances, but also riemanean
+   *  distances (i.e. for Earth surface distance calculation with lat/long
+   *  systems).
+   */
+
+  /**
+   *  @brief functor that calculates a manhattan distance between 2 vectors (in
+   *  mathematical sense). A manhattan distance is simply the addition of all
+   *  the difference in the vector.
+   *
+   *  The manhattan distance is a very simple distance calculation that will
+   *  illustrate easily the distance calculator.
+   *
+   *  WARNING: In case of very large differences, the distance could overflow.
+   */
+  template <typename TypeDistance>
+  struct manhattan_distance
+  {
+    typedef TypeDistance distance_type;
+
+    template <typename V1, typename V2>
+    distance_type distance(const V1& a, const V2& b, const size_t dim) const
+    {
+      distance_type r = 0;
+      for (size_t i=0; i<dim; ++i)
+	{
+	  r += fabs(a[i] - b[i]);
+	}
+      return r;
+     }
+
+    template <typename V1, typename V2>
+    distance_type proj_distance(const V1& a, const V2& b,
+				const size_t dim, const size_t proj_dim) const
+    {
+	    return fabs(a[proj_dim] - b[proj_dim]);
+    }
+  }; 
+
+  /**
+   *  @brief functor that calculates a distance between 2 vectors (in
    *  mathematical sense) using an euclidean metric in a way that avoids
    *  overflow.
    *
@@ -43,32 +113,40 @@ namespace KDTree
    *  which the operator[] is defined. This operator can be uses to get the
    *  vector's element for a particular dimension.
    */
-  typename <typename TypeDistance>
+  template <typename TypeDistance>
   struct euclidean_distance
   {
     typedef TypeDistance distance_type;
 
-    typename <typename V1, typename V2>
-    distance_type distance(const V1& a, const V2& b, size_t d)
+    template <typename V1, typename V2>
+    distance_type distance(const V1& a, const V2& b, const size_t dim) const
     {
       // first pass to determine max val
       double w = 0.0;
-      for (size_t i=0; i<d; ++i)
+      for (size_t i=0; i<dim; ++i)
 	{
 	  double c = fabs(static_cast<double>(a[i]-b[i]));
-	  if (c > w) { w = c }
+	  if (c > w) { w = c; }
 	}
 
       if (w == 0.0) { return static_cast<distance_type>(0.0); }
 
       // second pass to compute the distance
       double r = 0.0;
-      for (size_t i=0; i<d; ++i)
+      for (size_t i=0; i<dim; ++i)
 	{
 	  double x = fabs(static_cast<double>(a[i]-b[i])) / w;
 	  r += x * x;
 	}
       return static_cast<distance_type>(w * sqrt(r));
+    }
+
+    template <typename V1, typename V2>
+    distance_type proj_distance(const V1& a, const V2& b,
+				const size_t dim, const size_t proj_dim) const
+    {
+      return static_cast<distance_type>
+	(fabs(static_cast<double>(a[proj_dim] - b[proj_dim])));
     }
   };
 

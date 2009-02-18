@@ -247,7 +247,8 @@ int main()
       std::pair<tree_type::const_iterator,double> found = t.find_nearest(s,std::numeric_limits<double>::max());
       std::cout << "Nearest to " << s << " @ " << found.second << " " << *found.first << std::endl;
       std::cout << "Should be " << found.first->distance_to(s) << std::endl;
-      assert(found.second == found.first->distance_to(s));
+      assert(found.second > found.first->distance_to(s) - 0.0000001 
+	&& found.second < found.first->distance_to(s) + 0.0000001);
       }
 
       {
@@ -255,7 +256,8 @@ int main()
       std::pair<tree_type::const_iterator,double> found = t.find_nearest(s2,std::numeric_limits<double>::max());
       std::cout << "Nearest to " << s2 << " @ " << found.second << " " << *found.first << std::endl;
       std::cout << "Should be " << found.first->distance_to(s2) << std::endl;
-      assert(found.second == found.first->distance_to(s2));
+      assert(found.second > found.first->distance_to(s2) - 0.0000001
+	&& found.second < found.first->distance_to(s2) + 0.0000001);
       }
 
       std::cout << std::endl;

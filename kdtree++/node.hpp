@@ -185,36 +185,18 @@ namespace KDTree
    *  provide operator[] for the value.
    */
   template <typename _Val, typename _Acc>
-  struct value_proxy
+  struct val_proxy
   {
     const _Val& value;
     const _Acc& accessor;
 
-    _Acc::result_type operator[] (size_t d)
+    val_proxy (const _Val& v, const _Acc& a)
+      : value(v), accessor(a)
+    { }
+
+    typename _Acc::result_type operator[] (const size_t d) const
     {
       return accessor(value, d);
-    }
-  };
-
-  /**
-   *  Similar to the above, except that the value being accessed is the result
-   *  of its projection of on an hyperplane orthogonal to a dimension
-   *  'projection_dim' and containing the value 'projection_value'.
-   */
-  template <typename _Val, typename _Acc>
-  struct projection_proxy
-  {
-    size_t projection_dim;
-    const _Val& projection_value;
-    const _Val& value;
-    const _Acc& accessor;
-
-    _Acc::result_type operator[] (size_t d)
-    {
-      if (d == projection_dim)
-	{ return accessor(value, d); }
-      else
-	{ return accessor(projection_value, d); }
     }
   };
 
@@ -227,45 +209,52 @@ namespace KDTree
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_node_distance (const size_t __dim,
-		    const _Dist& __dist, const _Acc& __acc,
-		    const _Val& __a, const _Val& __b)
+  _S_node_proj_dist (const size_t __dim, const size_t __proj_dim,
+		     const _Dist& __dist, const _Acc& __acc,
+		     const _Val& __a, const _Val& __b)
   {
-    
-    return __dist.distance(__acc(__a, __dim), __acc(__b, __dim));
+    return __dist.proj_distance(val_proxy<_Val, _Acc>(__a, __acc),
+				val_proxy<_Val, _Acc>(__b, __acc),
+				__dim, __proj_dim);
   }
 
   template <typename _Val, typename _Dist,
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_node_distance (const size_t __dim,
-		    const _Dist& __dist, const _Acc& __acc,
-		    const _Val& __a, const _Node<_Val>* __b)
+  _S_node_proj_dist (const size_t __dim, const size_t __proj_dim,
+		     const _Dist& __dist, const _Acc& __acc,
+		     const _Val& __a, const _Node<_Val>* __b)
   {
-    return __dist(__acc(__a, __dim), __acc(__b->_M_value, __dim));
+    return __dist.proj_distance(val_proxy<_Val, _Acc>(__a, __acc),
+				val_proxy<_Val, _Acc>(__b->_M_value, __acc),
+				__dim, __proj_dim);
   }
 
   template <typename _Val, typename _Dist,
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_node_distance (const size_t __dim,
-		    const _Dist& __dist, const _Acc& __acc,
-		    const _Node<_Val>* __a, const _Val& __b)
+  _S_node_proj_dist (const size_t __dim, const size_t __proj_dim,
+		     const _Dist& __dist, const _Acc& __acc,
+		     const _Node<_Val>* __a, const _Val& __b)
   {
-    return __dist(__acc(__a->_M_value, __dim), __acc(__b, __dim));
+    return __dist.proj_distance(val_proxy<_Val, _Acc>(__a->_M_value, __acc),
+				val_proxy<_Val, _Acc>(__b, __acc),
+				__dim, __proj_dim);
   }
 
   template <typename _Val, typename _Dist,
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_node_distance (const size_t __dim,
-		    const _Dist& __dist, const _Acc& __acc,
-		    const _Node<_Val>* __a, const _Node<_Val>* __b)
+  _S_node_proj_dist (const size_t __dim, const size_t __proj_dim,
+		     const _Dist& __dist, const _Acc& __acc,
+		     const _Node<_Val>* __a, const _Node<_Val>* __b)
   {
-    return __dist(__acc(__a->_M_value, __dim), __acc(__b->_M_value, __dim));
+    return __dist.proj_distance(val_proxy<_Val, _Acc>(__a->_M_value, __acc),
+				val_proxy<_Val, _Acc>(__b->_M_value, __acc),
+				__dim, __proj_dim);
   }
 
   /*! Compute the distance between two values and accumulate the result for all
@@ -278,59 +267,48 @@ namespace KDTree
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_accumulate_node_distance (const size_t __dim,
-			       const _Dist& __dist, const _Acc& __acc,
-			       const _Val& __a, const _Val& __b)
+  _S_node_dist (const size_t __dim,
+		const _Dist& __dist, const _Acc& __acc,
+		const _Val& __a, const _Val& __b)
   {
-    typename _Dist::distance_type d = 0;
-    for (size_t i=0; i<__dim; ++i)
-      d += __dist(__acc(__a, i), __acc(__b, i));
-    return d;
+    return __dist.distance(val_proxy<_Val, _Acc>(__a, __acc),
+			   val_proxy<_Val, _Acc>(__b, __acc), __dim);
   }
 
   template <typename _Val, typename _Dist,
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_accumulate_node_distance (const size_t __dim,
-			       const _Dist& __dist, const _Acc& __acc,
-			       const _Val& __a,
-			       const _Node<_Val>* __b)
+  _S_node_dist (const size_t __dim,
+		const _Dist& __dist, const _Acc& __acc,
+		const _Val& __a, const _Node<_Val>* __b)
   {
-    typename _Dist::distance_type d = 0;
-    for (size_t i=0; i<__dim; ++i)
-      d += __dist(__acc(__a, i), __acc(__b->_M_value, i));
-    return d;
+    return __dist.distance(val_proxy<_Val, _Acc>(__a, __acc),
+			   val_proxy<_Val, _Acc>(__b->_M_value, __acc), __dim);
   }
 
   template <typename _Val, typename _Dist,
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_accumulate_node_distance (const size_t __dim,
-			       const _Dist& __dist, const _Acc& __acc,
-			       const _Node<_Val>* __a,
-			       const _Val& __b)
+  _S_node_dist (const size_t __dim,
+		const _Dist& __dist, const _Acc& __acc,
+		const _Node<_Val>* __a, const _Val& __b)
   {
-    typename _Dist::distance_type d = 0;
-    for (size_t i=0; i<__dim; ++i)
-      d += __dist(__acc(__a->_M_value, i), __acc(__b, i));
-    return d;
+    return __dist.distance(val_proxy<_Val, _Acc>(__a->_M_value, __acc),
+			   val_proxy<_Val, _Acc>(__b, __acc), __dim);
   }
 
   template <typename _Val, typename _Dist,
 	    typename _Acc>
   inline
   typename _Dist::distance_type
-  _S_accumulate_node_distance (const size_t __dim,
-			       const _Dist& __dist, const _Acc& __acc,
-			       const _Node<_Val>* __a,
-			       const _Node<_Val>* __b)
+  _S_node_dist (const size_t __dim,
+		const _Dist& __dist, const _Acc& __acc,
+		const _Node<_Val>* __a, const _Node<_Val>* __b)
   {
-    typename _Dist::distance_type d = 0;
-    for (size_t i=0; i<__dim; ++i)
-      d += __dist(__acc(__a->_M_value, i), __acc(__b->_M_value, i));
-    return d;
+    return __dist.distance(val_proxy<_Val, _Acc>(__a->_M_value, __acc),
+			   val_proxy<_Val, _Acc>(__b->_M_value, __acc), __dim);
   }
 
   /*! Descend on the left or the right of the node according to the comparison
@@ -379,9 +357,8 @@ namespace KDTree
       {
 	if (__p(static_cast<const _Node<_Val>* >(cur)->_M_value))
 	  {
-	    typename _Dist::distance_type d = 0;
-	    for (size_t i=0; i < __k && d <= __max; ++i)
-	      d += _S_node_distance(i, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur));
+	    typename _Dist::distance_type d
+	      = _S_node_dist(__k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur));
 	    if (d <= __max)
           // ("bad candidate notes")
           // Changed: removed this test: || ( d == __max && cur < __best ))
@@ -413,7 +390,7 @@ namespace KDTree
       near_node = probe->_M_left;
     if (near_node
 	// only visit node's children if node's plane intersect hypersphere
-	&& (_S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max))
+	&& (_S_node_proj_dist(__k, probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max))
       {
 	probe = near_node;
 	++probe_dim;
@@ -436,9 +413,8 @@ namespace KDTree
 	      {
 		if (__p(static_cast<const _Node<_Val>* >(probe)->_M_value))
 		  {
-		    typename _Dist::distance_type d = 0;
-		    for (size_t i=0; i < __k && d <= __max; ++i)
-		      d += _S_node_distance(i, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe));
+		    typename _Dist::distance_type d
+		      = _S_node_dist(__k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe));
           if (d <= __max)  // CHANGED, see the above notes ("bad candidate notes")
 		      {
 			__best = static_cast<const _Node<_Val>* >(probe);
@@ -454,7 +430,7 @@ namespace KDTree
 		  }
 		else if (far_node &&
 			 // only visit node's children if node's plane intersect hypersphere
-			 _S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max)
+			 _S_node_proj_dist(__k, probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max)
 		  {
 		    probe = far_node;
 		    ++probe_dim;
@@ -469,7 +445,7 @@ namespace KDTree
 	      {
 		if (pprobe == near_node && far_node
 		    // only visit node's children if node's plane intersect hypersphere
-		    && _S_node_distance(probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max)
+		    && _S_node_proj_dist(__k, probe_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(probe)) <= __max)
 		  {
 		    pprobe = probe;
 		    probe = far_node;
@@ -497,7 +473,7 @@ namespace KDTree
 	      near_node = cur->_M_left;
 	    if (near_node
 		// only visit node's children if node's plane intersect hypersphere
-		&& (_S_node_distance(cur_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur)) <= __max))
+		&& (_S_node_proj_dist(__k, cur_dim % __k, __dist, __acc, __val, static_cast<const _Node<_Val>* >(cur)) <= __max))
 	      {
 		probe = near_node;
 		++probe_dim;
