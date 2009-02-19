@@ -53,12 +53,12 @@
 //  KDTREE_VERSION % 100 is the patch level
 //  KDTREE_VERSION / 100 % 1000 is the minor version
 //  KDTREE_VERSION / 100000 is the major version
-#define KDTREE_VERSION 603
+#define KDTREE_VERSION 701
 //
 //  KDTREE_LIB_VERSION must be defined to be the same as KDTREE_VERSION
 //  but as a *string* in the form "x_y[_z]" where x is the major version
 //  number, y is the minor version number, and z is the patch level if not 0.
-#define KDTREE_LIB_VERSION "0_6_3"
+#define KDTREE_LIB_VERSION "0_7_1"
 
 
 #include <vector>
@@ -402,8 +402,9 @@ namespace KDTree
       // so if you are looking for any item with the same location,
       // according to the standard accessor comparisions,
       // then this is the function for you.
+      template <class SearchVal>
       const_iterator
-      find(const_reference __V) const
+      find(SearchVal const& __V) const
       {
         if (!_M_get_root()) return this->end();
         return _M_find(_M_get_root(), __V, 0);
@@ -423,8 +424,9 @@ namespace KDTree
       // either one of them.  But no two items have the same ID, so
       // find_exact() would always return the item with the same location AND id.
       //
+      template <class SearchVal>
       const_iterator
-      find_exact(const_reference __V) const
+      find_exact(SearchVal const& __V) const
       {
         if (!_M_get_root()) return this->end();
         return _M_find_exact(_M_get_root(), __V, 0);
@@ -450,7 +452,7 @@ namespace KDTree
 
       template <typename SearchVal, class Visitor>
         Visitor
-        visit_within_range(SearchVal V, subvalue_type const R, Visitor visitor) const
+        visit_within_range(SearchVal const& V, subvalue_type const R, Visitor visitor) const
         {
           if (!_M_get_root()) return visitor;
           _Region_ region(V, R, _M_acc, _M_cmp);
@@ -477,7 +479,7 @@ namespace KDTree
 
       template <typename SearchVal, typename _OutputIterator>
         _OutputIterator
-        find_within_range(SearchVal val, subvalue_type const range,
+        find_within_range(SearchVal const& val, subvalue_type const range,
                           _OutputIterator out) const
         {
           if (!_M_get_root()) return out;
@@ -499,8 +501,9 @@ namespace KDTree
           return out;
         }
 
+      template <class SearchVal>
       std::pair<const_iterator, distance_type>
-      find_nearest (const value_type& __val) const
+      find_nearest (SearchVal const& __val) const
       {
 	if (_M_get_root())
 	  {
@@ -508,8 +511,7 @@ namespace KDTree
 	      std::pair<size_type, typename _Acc::result_type> >
 	      best = _S_node_nearest (__K, 0, __val,
 				      _M_get_root(), &_M_header, _M_get_root(),
-				      _S_accumulate_node_distance
-				      (__K, _M_dist, _M_acc, _M_get_root(), __val),
+				      _S_node_dist(__K, _M_dist, _M_acc, _M_get_root()->_M_value, __val),
 				      _M_cmp, _M_acc, _M_dist,
 				      always_true<value_type>());
 	    return std::pair<const_iterator, distance_type>
@@ -518,8 +520,9 @@ namespace KDTree
 	  return std::pair<const_iterator, distance_type>(end(), 0);
       }
 
+      template <class SearchVal>
       std::pair<const_iterator, distance_type>
-      find_nearest (const value_type& __val, distance_type __max) const
+      find_nearest (SearchVal const& __val, distance_type __max) const
       {
 	if (_M_get_root())
 	  {
@@ -527,7 +530,7 @@ namespace KDTree
 	    const _Node<_Val>* node = _M_get_root();
        { // scope to ensure we don't use 'root_dist' anywhere else
 	    distance_type root_dist =_S_node_dist
-	      (__K, _M_dist, _M_acc, _M_get_root(), __val);
+	      (__K, _M_dist, _M_acc, _M_get_root()->_M_value, __val);
 	    if (root_dist <= __max)
 	      {
             root_is_candidate = true;
@@ -547,9 +550,9 @@ namespace KDTree
 	  return std::pair<const_iterator, distance_type>(end(), __max);
       }
 
-      template <typename _Predicate>
+      template <class SearchVal, class _Predicate>
       std::pair<const_iterator, distance_type>
-      find_nearest_if (const value_type& __val, distance_type __max,
+      find_nearest_if (SearchVal const& __val, distance_type __max,
 		       _Predicate __p) const
       {
 	if (_M_get_root())
@@ -560,7 +563,7 @@ namespace KDTree
 	      {
             { // scope to ensure we don't use root_dist anywhere else
 	    distance_type root_dist = _S_node_dist
-		  (__K, _M_dist, _M_acc, _M_get_root(), __val);
+		  (__K, _M_dist, _M_acc, _M_get_root()->_M_value, __val);
 		if (root_dist <= __max)
 		  {
            root_is_candidate = true;
@@ -610,8 +613,8 @@ namespace KDTree
             // REMEMBER! its a <= relationship for BOTH branches
             // for left-case (true), child<=node --> !(node<child)
             // for right-case (false), node<=child --> !(child<node)
-            assert(!to_the_left || !compare(parent,child));  // check the left
-            assert(to_the_left || !compare(child,parent));   // check the right
+            assert(!to_the_left || !compare(parent->_M_value,child->_M_value));  // check the left
+            assert(to_the_left || !compare(child->_M_value,parent->_M_value));   // check the right
             // and recurse down the tree, checking everything
             _M_check_children(_S_left(child),parent,level,to_the_left);
             _M_check_children(_S_right(child),parent,level,to_the_left);
@@ -665,7 +668,7 @@ namespace KDTree
       _M_insert(_Link_type __N, const_reference __V,
              size_type const __L)
       {
-        if (_Node_compare_(__L % __K, _M_acc, _M_cmp)(__V, __N))
+        if (_Node_compare_(__L % __K, _M_acc, _M_cmp)(__V, __N->_M_value))
           {
             if (!_S_left(__N))
               return _M_insert_left(__N, __V);
@@ -748,7 +751,7 @@ namespace KDTree
 	   _Node_compare_ compare(level % __K, _M_acc, _M_cmp);
             // compare the children based on this level's criteria...
             // (this gives virtually random results)
-            if (compare(_S_right(node), _S_left(node)))
+            if (compare(_S_right(node)->_M_value, _S_left(node)->_M_value))
                // the right is smaller, get our replacement from the SMALLEST on the right
                candidate = _M_get_j_min(std::pair<_Link_type,size_type>(_S_right(node),level), level+1);
             else
@@ -781,13 +784,13 @@ namespace KDTree
         if (_S_left(node.first))
           {
             Result left = _M_get_j_min(Result(_S_left(node.first), node.second), level+1);
-            if (compare(left.first, candidate.first))
+            if (compare(left.first->_M_value, candidate.first->_M_value))
                 candidate = left;
           }
         if (_S_right(node.first))
           {
             Result right = _M_get_j_min( Result(_S_right(node.first),node.second), level+1);
-            if (compare(right.first, candidate.first))
+            if (compare(right.first->_M_value, candidate.first->_M_value))
                 candidate = right;
           }
         if (candidate.first == node.first)
@@ -811,13 +814,13 @@ namespace KDTree
         if (_S_left(node.first))
           {
             Result left = _M_get_j_max( Result(_S_left(node.first),node.second), level+1);
-            if (compare(candidate.first, left.first))
+            if (compare(candidate.first->_M_value, left.first->_M_value))
                 candidate = left;
           }
         if (_S_right(node.first))
           {
             Result right = _M_get_j_max(Result(_S_right(node.first),node.second), level+1);
-            if (compare(candidate.first, right.first))
+            if (compare(candidate.first->_M_value, right.first->_M_value))
                 candidate = right;
           }
 
@@ -850,7 +853,7 @@ namespace KDTree
           const_iterator found = this->end();
 
 	  _Node_compare_ compare(level % __K, _M_acc, _M_cmp);
-        if (!compare(node,value))   // note, this is a <= test
+        if (!compare(node->_M_value,value))   // note, this is a <= test
           {
            // this line is the only difference between _M_find_exact() and _M_find()
             if (_M_matches_node(node, value, level))
@@ -858,7 +861,7 @@ namespace KDTree
             if (_S_left(node))
                found = _M_find(_S_left(node), value, level+1);
           }
-        if ( _S_right(node) && found == this->end() && !compare(value,node))   // note, this is a <= test
+        if ( _S_right(node) && found == this->end() && !compare(value,node->_M_value))   // note, this is a <= test
             found = _M_find(_S_right(node), value, level+1);
         return found;
       }
@@ -873,7 +876,7 @@ namespace KDTree
           const_iterator found = this->end();
 
 	  _Node_compare_ compare(level % __K, _M_acc, _M_cmp);
-        if (!compare(node,value))  // note, this is a <= test
+        if (!compare(node->_M_value,value))  // note, this is a <= test
         {
            // this line is the only difference between _M_find_exact() and _M_find()
             if (value == *const_iterator(node))
@@ -883,7 +886,7 @@ namespace KDTree
         }
 
         // note: no else!  items that are identical can be down both branches
-        if ( _S_right(node) && found == this->end() && !compare(value,node))   // note, this is a <= test
+        if ( _S_right(node) && found == this->end() && !compare(value,node->_M_value))   // note, this is a <= test
             found = _M_find_exact(_S_right(node), value, level+1);
         return found;
       }
@@ -893,7 +896,7 @@ namespace KDTree
                            size_type const __L) const
       {
         _Node_compare_ compare(__L % __K, _M_acc, _M_cmp);
-        return !(compare(__N, __V) || compare(__V, __N));
+        return !(compare(__N->_M_value, __V) || compare(__V, __N->_M_value));
       }
 
       bool
@@ -1009,81 +1012,6 @@ namespace KDTree
           return out;
         }
 
-        // quick little power function
-        // next-best is __gnu_cxx::power
-        // std::pow() is probably not ideal for simple powers. I forget exact details...
-        distance_type _M_square( distance_type x ) const { return x*x; }
-
-       // WARNING: Calculates and RETURNS dist^2 (for speed)
-       // NOTE: CENTER is a region of zero area.  It is the point we are aiming for.
-       //
-       // How it works: Starting with a centerpt (single-pt in a region, with a range
-       // attached to it), and bounds, it first calculates the distance to THIS node,
-       // and adjusts the center's range DOWN if its closer.  No point looking further
-       // than it needs to look.  A form of a dynamic find_within_range.
-       // It expands the bounds as usual and sees if it intersects the centerpt+range.
-       // And so it goes ...
-
-         template <class Predicate>
-         std::pair<const_iterator,distance_type>
-        _M_find_nearest( _Link_const_type __N, typename _Region_::_CenterPt __CENTER,
-                             _Region_ const& __BOUNDS,
-                             size_type const __L,
-                             Predicate predicate ) const
-        {
-           std::pair<const_iterator,distance_type> best(this->end(),__CENTER.second);
-
-           // we ignore this node if the predicate isn't true
-           if (predicate(*const_iterator(__N)))
-           {
-              distance_type dist = 0;
-              for ( size_type i = 0; i != __K; ++i )
-              {
-                 dist += _M_square( __CENTER.first._M_low_bounds[i] - _M_acc(_S_value(__N),i) );
-              }
-#ifdef KDTREE_CHECK_PERFORMANCE
-//              ++num_dist_calcs;
-#endif
-              dist = sqrt(dist);
-
-              best.first = __N;
-              best.second = dist;
-           }
-
-           // adjust our CENTER target
-           __CENTER.second = std::min(__CENTER.second,best.second);
-
-          if (_S_left(__N))
-            {
-              _Region_ __bounds(__BOUNDS);
-              __bounds.set_high_bound(_S_value(__N), __L);
-              if (__bounds.intersects_with(__CENTER))
-              {
-                 std::pair<const_iterator,distance_type> left =
-                    _M_find_nearest( _S_left(__N), __CENTER, __bounds, __L+1, predicate);
-                 // check if better than what I found
-                 if (left.second < best.second) best = left;
-              }
-            }
-
-           // adjust our center target (only useful if left found something closer)
-           __CENTER.second = std::min(__CENTER.second,best.second);
-
-          if (_S_right(__N))
-            {
-              _Region_ __bounds(__BOUNDS);
-              __bounds.set_low_bound(_S_value(__N), __L);
-              if (__bounds.intersects_with(__CENTER))
-              {
-                 std::pair<const_iterator,distance_type> right =
-                    _M_find_nearest( _S_right(__N), __CENTER, __bounds, __L+1, predicate);
-                 // check if better than what I found
-                 if (right.second < best.second) best = right;
-               }
-            }
-
-          return best;
-        }
 
       template <typename _Iter>
         void

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([libkdtree++], [0.6.3], http://alioth.debian.org/projects/libkdtree/)
+AC_INIT([libkdtree++], [0.7.1], http://alioth.debian.org/projects/libkdtree/)
 AC_CONFIG_SRCDIR([kdtree++/kdtree.hpp])
 AC_CONFIG_HEADER([config.h])
 
