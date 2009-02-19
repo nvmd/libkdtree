@@ -54,7 +54,7 @@ namespace KDTree
    *
    *  The second declaration define the distance between 2 element of the tree.
    *  The types V1 and V2 are a wrapper around the element type of the tree
-   *  that always provides the braket accessor.
+   *  that always provides the braket accessor (operator []).
    *
    *  The third declaration is mostly similar to the second one. However the
    *  result of the computation should be the distance that is computed between
@@ -63,7 +63,7 @@ namespace KDTree
    *
    *  A distance functor declared in such way can be used to compute orthogonal
    *  distances, manhanttan distances, euclidean distances, but also riemanean
-   *  distances (i.e. for Earth surface distance calculation with lat/long
+   *  distances (for ex: Earth surface distance calculation with lat/long
    *  systems).
    */
 
@@ -75,7 +75,14 @@ namespace KDTree
    *  The manhattan distance is a very simple distance calculation that will
    *  illustrate easily the distance calculator.
    *
-   *  WARNING: In case of very large differences, the distance could overflow.
+   *  The function works using double in the backend, so TypeDistance must be
+   *  castable into a double and vice-versa.
+   *
+   *  The template types V1 and V2 are used by the tree to pass 2 vectors for
+   *  which the operator[] is defined. This operator can be uses to get the
+   *  vector's element for a particular dimension.
+   *
+   *  WARNING: this distance functor can overflow. Use with caution.
    */
   template <typename TypeDistance>
   struct manhattan_distance
@@ -139,6 +146,45 @@ namespace KDTree
 	  r += x * x;
 	}
       return static_cast<distance_type>(w * sqrt(r));
+    }
+
+    template <typename V1, typename V2>
+    distance_type proj_distance(const V1& a, const V2& b,
+				const size_t dim, const size_t proj_dim) const
+    {
+      return static_cast<distance_type>
+	(fabs(static_cast<double>(a[proj_dim] - b[proj_dim])));
+    }
+  };
+
+  /**
+   *  @brief functor that calculates a distance between 2 vectors (in
+   *  mathematical sense) using an euclidean metric.
+   *
+   *  WARNING: this distance functor can overflow. Use with caution.
+   *
+   *  The function works using double in the backend, so TypeDistance must be
+   *  castable into a double and vice-versa.
+   *
+   *  The template types V1 and V2 are used by the tree to pass 2 vectors for
+   *  which the operator[] is defined. This operator can be uses to get the
+   *  vector's element for a particular dimension.
+   */
+  template <typename TypeDistance>
+  struct fast_euclidean_distance
+  {
+    typedef TypeDistance distance_type;
+
+    template <typename V1, typename V2>
+    distance_type distance(const V1& a, const V2& b, const size_t dim) const
+    {
+      double r = 0.0;
+      for (size_t i=0; i<dim; ++i)
+	{
+	  double x = fabs(static_cast<double>(a[i]-b[i]));
+	  r += x * x;
+	}
+      return static_cast<distance_type>(sqrt(r));
     }
 
     template <typename V1, typename V2>
