@@ -9,8 +9,8 @@
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW
 
-/* Define to 1 if the system has the type `ptrdiff_t'. */
-#undef HAVE_PTRDIFF_T
+/* Define to 1 if the system has the type `ptrdiff_t size_t'. */
+#undef HAVE_PTRDIFF_T_SIZE_T
 
 /* Define to 1 if you have the `sqrt' function. */
 #undef HAVE_SQRT

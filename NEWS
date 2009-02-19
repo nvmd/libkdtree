@@ -1,6 +1,17 @@
 libkdtree++ NEWS
 ================
 
+17 Nov 2008:
+   Again, it's almost Christmas. Recently a whole lot of bug have been fixed in
+   version 0.6.3 of the library. You can find a summary of the fixes in the
+   Changelog. For short:
+   - you can now assign an existing tree to another tree without an ugly bug if
+   your tree required parameters for the accessor,
+   - now you can finally use the reverse iterator,
+   - find() and erase() work properly based on the location given in argument,
+   - the project is compatible with MSVC2005
+   - many more...
+
 02 Dec 2007:
    It's Christmas, and libkdtree++ packs in more power for the find
    and find_nearest functions. Performance improvement should be
