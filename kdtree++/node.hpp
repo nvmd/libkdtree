@@ -43,24 +43,6 @@ namespace KDTree
       while (__x->_M_right) __x = __x->_M_right;
       return __x;
     }
-
-#ifdef KDTREE_DEFINE_OSTREAM_OPERATORS
-
-     template <typename Char, typename Traits>
-       friend
-       std::basic_ostream<Char, Traits>&
-       operator<<(typename std::basic_ostream<Char, Traits>& out,
-                  _Node_base const& node)
-       {
-         out << &node;
-         out << " parent: " << node._M_parent;
-         out << "; left: " << node._M_left;
-         out << "; right: " << node._M_right;
-         return out;
-       }
-
-#endif
-
   };
 
   template <typename _Val>
@@ -78,6 +60,19 @@ namespace KDTree
         : _Node_base(__PARENT, __LEFT, __RIGHT), _M_value(__VALUE) {}
 
 #ifdef KDTREE_DEFINE_OSTREAM_OPERATORS
+
+     template <typename Char, typename Traits>
+       friend
+       std::basic_ostream<Char, Traits>&
+       operator<<(typename std::basic_ostream<Char, Traits>& out,
+                  _Node_base const& node)
+       {
+         out << &node;
+         out << " parent: " << node._M_parent;
+         out << "; left: " << node._M_left;
+         out << "; right: " << node._M_right;
+         return out;
+       }
 
      template <typename Char, typename Traits>
        friend
@@ -175,7 +170,7 @@ namespace KDTree
    */
   template <typename _Val, typename _Cmp, typename _Acc, typename NodeType>
   inline
-  NodeType*
+  const NodeType*
   _S_node_descend (const size_t __dim,
 		   const _Cmp& __cmp, const _Acc& __acc,
 		   const _Val& __val, const NodeType* __node)
@@ -223,7 +218,7 @@ namespace KDTree
           // ("bad candidate notes")
           // Changed: removed this test: || ( d == __max && cur < __best ))
           // Can't do this optimisation without checking that the current 'best' is not the root AND is not a valid candidate...
-          // This is because find_nearest() etc will call this function with the best set to _M_root EVEN IF _M_root is not a valid answer (eg too far_node away or doesn't pass the predicate test)
+          // This is because find_nearest() etc will call this function with the best set to _M_root EVEN IF _M_root is not a valid answer (eg too far away or doesn't pass the predicate test)
 	      {
 		__best = cur;
 		__max = d;
