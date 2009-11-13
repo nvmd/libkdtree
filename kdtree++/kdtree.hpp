@@ -112,6 +112,7 @@ namespace KDTree
     public:
       typedef _Region<__K, _Val, typename _Acc::result_type, _Acc, _Cmp>
         _Region_;
+      typedef Bounds_T<__K, typename _Acc::result_type> Bounds;
       typedef _Val value_type;
       typedef value_type* pointer;
       typedef value_type const* const_pointer;
@@ -441,12 +442,13 @@ namespace KDTree
           return this->count_within_range(__region);
         }
 
+      template <class RegionT>
       size_type
-        count_within_range(_Region_ const& __REGION) const
+        count_within_range(RegionT const& __REGION) const
         {
           if (!_M_get_root()) return 0;
 
-          _Region_ __bounds(__REGION);
+          Bounds __bounds = __REGION.get_bounds();
           return _M_count_within_range(_M_get_root(),
                                __REGION, __bounds, 0);
         }
@@ -460,13 +462,13 @@ namespace KDTree
           return this->visit_within_range(region, visitor);
         }
 
-      template <class Visitor>
+      template <class RegionT, class Visitor>
         Visitor
-        visit_within_range(_Region_ const& REGION, Visitor visitor) const
+        visit_within_range(RegionT const& REGION, Visitor visitor) const
         {
           if (_M_get_root())
             {
-              _Region_ bounds(REGION);
+              Bounds bounds = REGION.get_bounds();
               return _M_visit_within_range(visitor, _M_get_root(), REGION, bounds, 0);
             }
           return visitor;
@@ -482,14 +484,14 @@ namespace KDTree
           return this->find_within_range(region, out);
         }
 
-      template <typename _OutputIterator>
+      template <class RegionT, typename _OutputIterator>
         _OutputIterator
-        find_within_range(_Region_ const& region,
+        find_within_range(RegionT const& region,
                           _OutputIterator out) const
         {
           if (_M_get_root())
             {
-              _Region_ bounds(region);
+              Bounds bounds = region.get_bounds();
               out = _M_find_within_range(out, _M_get_root(),
                                    region, bounds, 0);
             }
@@ -913,9 +915,10 @@ namespace KDTree
           && _M_matches_node_in_other_ds(__N, __V, __L);
       }
 
+      template <class RegionT>
       size_type
-        _M_count_within_range(_Link_const_type __N, _Region_ const& __REGION,
-                             _Region_ const& __BOUNDS,
+        _M_count_within_range(_Link_const_type __N, RegionT const& __REGION,
+                             Bounds const& __BOUNDS,
                              size_type const __L) const
         {
            size_type count = 0;
@@ -925,16 +928,16 @@ namespace KDTree
             }
           if (_S_left(__N))
             {
-              _Region_ __bounds(__BOUNDS);
-              __bounds.set_high_bound(_S_value(__N), __L);
+              Bounds __bounds(__BOUNDS);
+              __bounds.set_high_bound(_M_acc(_S_value(__N), __L % __K), __L % __K);
               if (__REGION.intersects_with(__bounds))
                 count += _M_count_within_range(_S_left(__N),
                                      __REGION, __bounds, __L+1);
             }
           if (_S_right(__N))
             {
-              _Region_ __bounds(__BOUNDS);
-              __bounds.set_low_bound(_S_value(__N), __L);
+              Bounds __bounds(__BOUNDS);
+              __bounds.set_low_bound(_M_acc(_S_value(__N), __L % __K), __L % __K);
               if (__REGION.intersects_with(__bounds))
                 count += _M_count_within_range(_S_right(__N),
                                      __REGION, __bounds, __L+1);
@@ -944,11 +947,11 @@ namespace KDTree
         }
 
 
-      template <class Visitor>
+      template <class RegionT, class Visitor>
         Visitor
         _M_visit_within_range(Visitor visitor,
-                             _Link_const_type N, _Region_ const& REGION,
-                             _Region_ const& BOUNDS,
+                             _Link_const_type N, RegionT const& REGION,
+                             Bounds const& BOUNDS,
                              size_type const L) const
         {
           if (REGION.encloses(_S_value(N)))
@@ -957,16 +960,16 @@ namespace KDTree
             }
           if (_S_left(N))
             {
-              _Region_ bounds(BOUNDS);
-              bounds.set_high_bound(_S_value(N), L);
+              Bounds bounds(BOUNDS);
+              bounds.set_high_bound(_M_acc(_S_value(N), L % __K), L % __K);
               if (REGION.intersects_with(bounds))
                 visitor = _M_visit_within_range(visitor, _S_left(N),
                                      REGION, bounds, L+1);
             }
           if (_S_right(N))
             {
-              _Region_ bounds(BOUNDS);
-              bounds.set_low_bound(_S_value(N), L);
+              Bounds bounds(BOUNDS);
+              bounds.set_low_bound(_M_acc(_S_value(N), L % __K), L % __K);
               if (REGION.intersects_with(bounds))
                 visitor = _M_visit_within_range(visitor, _S_right(N),
                                      REGION, bounds, L+1);
@@ -977,11 +980,11 @@ namespace KDTree
 
 
 
-      template <typename _OutputIterator>
+      template <class RegionT, typename _OutputIterator>
         _OutputIterator
         _M_find_within_range(_OutputIterator out,
-                             _Link_const_type __N, _Region_ const& __REGION,
-                             _Region_ const& __BOUNDS,
+                             _Link_const_type __N, RegionT const& __REGION,
+                             Bounds const& __BOUNDS,
                              size_type const __L) const
         {
           if (__REGION.encloses(_S_value(__N)))
@@ -990,16 +993,16 @@ namespace KDTree
             }
           if (_S_left(__N))
             {
-              _Region_ __bounds(__BOUNDS);
-              __bounds.set_high_bound(_S_value(__N), __L);
+              Bounds __bounds(__BOUNDS);
+              __bounds.set_high_bound(_M_acc(_S_value(__N), __L % __K), __L % __K);
               if (__REGION.intersects_with(__bounds))
                 out = _M_find_within_range(out, _S_left(__N),
                                      __REGION, __bounds, __L+1);
             }
           if (_S_right(__N))
             {
-              _Region_ __bounds(__BOUNDS);
-              __bounds.set_low_bound(_S_value(__N), __L);
+              Bounds __bounds(__BOUNDS);
+              __bounds.set_low_bound(_M_acc(_S_value(__N), __L % __K), __L % __K);
               if (__REGION.intersects_with(__bounds))
                 out = _M_find_within_range(out, _S_right(__N),
                                      __REGION, __bounds, __L+1);
