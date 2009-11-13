@@ -498,6 +498,19 @@ namespace KDTree
           return out;
         }
 
+      template <typename Visitor>
+        Visitor
+        visit_within_bounds(Bounds const& bounds,
+                          Visitor visitor) const
+        {
+          if (_M_get_root())
+            {
+              visitor = _M_visit_within_bounds(visitor, _M_get_root(),
+                                   bounds, 0);
+            }
+          return visitor;
+        }
+
       template <class SearchVal>
       std::pair<const_iterator, distance_type>
       find_nearest (SearchVal const& __val) const
@@ -974,6 +987,53 @@ namespace KDTree
                 visitor = _M_visit_within_range(visitor, _S_right(N),
                                      REGION, bounds, L+1);
             }
+
+          return visitor;
+        }
+
+
+
+      template <typename Visitor>
+        Visitor
+        _M_visit_within_bounds(Visitor visitor,
+                             _Link_const_type N,
+                             Bounds const& BOUNDS,
+                             size_type const L) const
+        {
+           size_type const dim = L % __K;
+
+           // if val < lowbounds[dim] then DONT go left...
+           bool go_left = ! _M_cmp(_M_acc(_S_value(N),dim),BOUNDS.low_bounds[dim]);
+           // if val > highbounds[dim] then DONT go right...
+           bool go_right = ! _M_cmp(BOUNDS.high_bounds[dim],_M_acc(_S_value(N),dim));
+
+           if (go_left && go_right)
+           {
+              // check this node is within bounds in the other dimensions
+              size_type i = 0;
+              for ( ; i != dim; ++i )
+                 if (_M_cmp(BOUNDS.high_bounds[i],_M_acc(_S_value(N),i)) 
+                       || _M_cmp(BOUNDS.high_bounds[i],_M_acc(_S_value(N),i)))
+                    break; // no good, cancel the loop early
+
+              if (i == dim)  // loop finished, check the second half
+              {
+                 ++i;   // skip 'dim', we already checked it with go_left,go_right
+                 for ( ; i != __K; ++i )
+                    if (_M_cmp(BOUNDS.high_bounds[i],_M_acc(_S_value(N),i)) 
+                          || _M_cmp(BOUNDS.high_bounds[i],_M_acc(_S_value(N),i)))
+                       break; // no good, cancel the loop early
+
+                 if (i == __K)  // second loop finished completely
+                    visitor(_S_value(N));
+              }
+           }
+
+           // now descend if appropriate
+           if (go_left && _S_left(N))
+              visitor = _M_visit_within_bounds(visitor, _S_left(N), BOUNDS, L+1);
+           if (go_right && _S_right(N))
+              visitor = _M_visit_within_bounds(visitor, _S_right(N), BOUNDS, L+1);
 
           return visitor;
         }
