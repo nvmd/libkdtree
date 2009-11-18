@@ -433,6 +433,7 @@ namespace KDTree
         return _M_find_exact(_M_get_root(), __V, 0);
       }
 
+      // NOTE: see notes on find_within_range().
       size_type
         count_within_range(const_reference __V, subvalue_type const __R) const
         {
@@ -451,6 +452,7 @@ namespace KDTree
                                __REGION, __bounds, 0);
         }
 
+      // NOTE: see notes on find_within_range().
       template <typename SearchVal, class Visitor>
         Visitor
         visit_within_range(SearchVal const& V, subvalue_type const R, Visitor visitor) const
@@ -472,6 +474,16 @@ namespace KDTree
           return visitor;
         }
 
+      // NOTE: this will visit points based on 'Manhattan distance' aka city-block distance
+      // aka taxicab metric. Meaning it will find all points within:
+      //    max(x_dist,max(y_dist,z_dist));
+      //  AND NOT than what you would expect: sqrt(x_dist*x_dist + y_dist*y_dist + z_dist*z_dist)
+      //
+      // This is because it converts the distance into a bounding-box 'region' and compares
+      // against that.
+      //
+      // If you want the sqrt() behaviour, ask on the mailing list for different options.
+      //
       template <typename SearchVal, typename _OutputIterator>
         _OutputIterator
         find_within_range(SearchVal const& val, subvalue_type const range,
