@@ -51,7 +51,7 @@ struct triplet
      double dist = 0;
      for (int i = 0; i != 3; ++i)
         dist += (d[i]-x.d[i])*(d[i]-x.d[i]);
-     return sqrt(dist);
+     return std::sqrt(dist);
   }
 
   inline value_type operator[](size_t const N) const { return d[N]; }
@@ -165,8 +165,8 @@ int main()
         // call find_nearest without a range value - it found a compile error earlier.
       std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target);
       assert(found.first != exact_dist.end());
-      std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << " @ " << found.second << " should be " << sqrt(8) << std::endl;
-      assert(found.second == sqrt(8));
+      std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << " @ " << found.second << " should be " << std::sqrt(8) << std::endl;
+      assert(found.second == std::sqrt(8));
    }
 
    {
@@ -175,10 +175,10 @@ int main()
         exact_dist.insert(c0);
         triplet target(7,4,0);
 
-      std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target,sqrt(8));
+      std::pair<tree_type::const_iterator,double> found = exact_dist.find_nearest(target,std::sqrt(8));
       assert(found.first != exact_dist.end());
-      std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << " @ " << found.second << " should be " << sqrt(8) << std::endl;
-      assert(found.second == sqrt(8));
+      std::cout << "Test find_nearest(), found at exact distance away from " << target << ", found " << *found.first << " @ " << found.second << " should be " << std::sqrt(8) << std::endl;
+      assert(found.second == std::sqrt(8));
    }
 
   tree_type src(std::ptr_fun(tac));

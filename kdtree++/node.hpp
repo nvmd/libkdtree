@@ -213,7 +213,7 @@ namespace KDTree
 	    typename _Dist::distance_type d = 0;
 	    for (size_t i=0; i != __k; ++i)
 	      d += _S_node_distance(i, __dist, __acc, __val, cur->_M_value);
-       d = sqrt(d);
+       d = std::sqrt(d);
 	    if (d <= __max)
           // ("bad candidate notes")
           // Changed: removed this test: || ( d == __max && cur < __best ))
@@ -245,7 +245,7 @@ namespace KDTree
       near_node = static_cast<NodePtr>(probe->_M_left);
     if (near_node
 	// only visit node's children if node's plane intersect hypersphere
-	&& (sqrt(_S_node_distance(probe_dim % __k, __dist, __acc, __val, probe->_M_value)) <= __max))
+	&& (std::sqrt(_S_node_distance(probe_dim % __k, __dist, __acc, __val, probe->_M_value)) <= __max))
       {
 	probe = near_node;
 	++probe_dim;
@@ -271,7 +271,7 @@ namespace KDTree
 		    typename _Dist::distance_type d = 0;
 		    for (size_t i=0; i < __k; ++i)
 		      d += _S_node_distance(i, __dist, __acc, __val, probe->_M_value);
-          d = sqrt(d);
+          d = std::sqrt(d);
           if (d <= __max)  // CHANGED, see the above notes ("bad candidate notes")
 		      {
 			__best = probe;
@@ -287,7 +287,7 @@ namespace KDTree
 		  }
 		else if (far_node &&
 			 // only visit node's children if node's plane intersect hypersphere
-			 sqrt(_S_node_distance(probe_dim % __k, __dist, __acc, __val, probe->_M_value)) <= __max)
+			 std::sqrt(_S_node_distance(probe_dim % __k, __dist, __acc, __val, probe->_M_value)) <= __max)
 		  {
 		    probe = far_node;
 		    ++probe_dim;
@@ -302,7 +302,7 @@ namespace KDTree
 	      {
 		if (pprobe == near_node && far_node
 		    // only visit node's children if node's plane intersect hypersphere
-		    && sqrt(_S_node_distance(probe_dim % __k, __dist, __acc, __val, probe->_M_value)) <= __max)
+		    && std::sqrt(_S_node_distance(probe_dim % __k, __dist, __acc, __val, probe->_M_value)) <= __max)
 		  {
 		    pprobe = probe;
 		    probe = far_node;
@@ -330,7 +330,7 @@ namespace KDTree
 	      near_node = static_cast<NodePtr>(cur->_M_left);
 	    if (near_node
 		// only visit node's children if node's plane intersect hypersphere
-		&& (sqrt(_S_node_distance(cur_dim % __k, __dist, __acc, __val, cur->_M_value)) <= __max))
+		&& (std::sqrt(_S_node_distance(cur_dim % __k, __dist, __acc, __val, cur->_M_value)) <= __max))
 	      {
 		probe = near_node;
 		++probe_dim;

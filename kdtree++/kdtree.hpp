@@ -506,7 +506,7 @@ namespace KDTree
 	      std::pair<size_type, typename _Acc::result_type> >
 	      best = _S_node_nearest (__K, 0, __val,
 				      _M_get_root(), &_M_header, _M_get_root(),
-				      sqrt(_S_accumulate_node_distance
+				      std::sqrt(_S_accumulate_node_distance
 				      (__K, _M_dist, _M_acc, _M_get_root()->_M_value, __val)),
 				      _M_cmp, _M_acc, _M_dist,
 				      always_true<value_type>());
@@ -525,7 +525,7 @@ namespace KDTree
         bool root_is_candidate = false;
 	    const _Node<_Val>* node = _M_get_root();
        { // scope to ensure we don't use 'root_dist' anywhere else
-	    distance_type root_dist = sqrt(_S_accumulate_node_distance
+	    distance_type root_dist = std::sqrt(_S_accumulate_node_distance
 	      (__K, _M_dist, _M_acc, _M_get_root()->_M_value, __val));
 	    if (root_dist <= __max)
 	      {
@@ -558,7 +558,7 @@ namespace KDTree
 	    if (__p(_M_get_root()->_M_value))
 	      {
             { // scope to ensure we don't use root_dist anywhere else
-	    distance_type root_dist = sqrt(_S_accumulate_node_distance
+	    distance_type root_dist = std::sqrt(_S_accumulate_node_distance
 		  (__K, _M_dist, _M_acc, _M_get_root()->_M_value, __val));
 		if (root_dist <= __max)
 		  {
