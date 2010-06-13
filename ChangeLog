@@ -1,6 +1,13 @@
 libkdtree++ ChangeLog
 =====================
 
+2008-11-17  Sylvain Bougerel  <sylvain.bougerel@asia.thalesgroup.com>
+
+	- Added #include<cstdio> in order to compile 'printf' statements in the
+	file 'examples/test_find_within_range.cpp'.
+	- Added patch from Max Fellermann in order to compile libkdtree++ with
+	clang++.
+
 2009-02-10  Paul Harris <paulharris@computer.org>
 
    - Bug fix: was incorrectly casting a pointer when the search key type
