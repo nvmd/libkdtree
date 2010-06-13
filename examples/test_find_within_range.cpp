@@ -1,5 +1,6 @@
 // Thanks to James Remillard
 //
+#include <cstdio>
 #include <kdtree++/kdtree.hpp>
 #include <vector>
 #include <map>
