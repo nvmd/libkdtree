@@ -166,6 +166,13 @@ int main()
   std::cout << tree << std::endl;
 
   // time to test! TODO
+  // it would involve querying the tree like so:
+  //
+  // triplet target(x,y,z);
+  // FindN_predicate::Data nearest_n(target,N);
+  // tree.find_nearest_if( target, numeric_limits<double>::max(), FindN_predicate(&nearest_n) );
+  //
+  // results are now in nearest_n.candidates
 
   return 0;
 }
