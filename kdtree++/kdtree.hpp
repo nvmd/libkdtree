@@ -91,7 +91,7 @@ namespace KDTree
    unsigned long long num_dist_calcs = 0;
 #endif
 
-  template <size_t const __K, typename _Val,
+  template <typename _Val,
             typename _Acc = _Bracket_accessor<_Val>,
 	    typename _Dist = squared_difference<typename _Acc::result_type,
 						typename _Acc::result_type>,
@@ -111,7 +111,7 @@ namespace KDTree
       typedef _Node_compare<_Val, _Acc, _Cmp> _Node_compare_;
 
     public:
-      typedef _Region<__K, _Val, typename _Acc::result_type, _Acc, _Cmp>
+      typedef _Region<_Val, typename _Acc::result_type, _Acc, _Cmp>
         _Region_;
       typedef _Val value_type;
       typedef value_type* pointer;
@@ -123,17 +123,17 @@ namespace KDTree
       typedef size_t size_type;
       typedef ptrdiff_t difference_type;
 
-      KDTree(_Acc const& __acc = _Acc(), _Dist const& __dist = _Dist(),
+      KDTree(size_type __k, _Acc const& __acc = _Acc(), _Dist const& __dist = _Dist(),
 	     _Cmp const& __cmp = _Cmp(), const allocator_type& __a = allocator_type())
         : _Base(__a), _M_header(),
-	  _M_count(0), _M_acc(__acc), _M_cmp(__cmp), _M_dist(__dist)
+	  _M_count(0), _M_acc(__acc), _M_cmp(__cmp), _M_dist(__dist), __K(__k)
       {
          _M_empty_initialise();
       }
 
       KDTree(const KDTree& __x)
          : _Base(__x.get_allocator()), _M_header(), _M_count(0),
-	   _M_acc(__x._M_acc), _M_cmp(__x._M_cmp), _M_dist(__x._M_dist)
+	   _M_acc(__x._M_acc), _M_cmp(__x._M_cmp), _M_dist(__x._M_dist), __K(__x.__K)
       {
          _M_empty_initialise();
          // this is slow:
@@ -151,11 +151,11 @@ namespace KDTree
       }
 
       template<typename _InputIterator>
-        KDTree(_InputIterator __first, _InputIterator __last,
+        KDTree(_InputIterator __first, _InputIterator __last, size_type __k,
 	       _Acc const& acc = _Acc(), _Dist const& __dist = _Dist(),
 	       _Cmp const& __cmp = _Cmp(), const allocator_type& __a = allocator_type())
         : _Base(__a), _M_header(), _M_count(0),
-	  _M_acc(acc), _M_cmp(__cmp), _M_dist(__dist)
+	  _M_acc(acc), _M_cmp(__cmp), _M_dist(__dist), __K(__k)
       {
          _M_empty_initialise();
          // this is slow:
@@ -205,6 +205,7 @@ namespace KDTree
 	    _M_acc = __x._M_acc;
 	    _M_dist = __x._M_dist;
 	    _M_cmp = __x._M_cmp;
+		__K = __x.__K;
          // this is slow:
          // this->insert(begin(), __x.begin(), __x.end());
          // this->optimise();
@@ -242,6 +243,12 @@ namespace KDTree
       max_size() const
       {
         return size_type(-1);
+      }
+      
+      size_type
+      dimension() const
+      {
+		return __K;
       }
 
       bool
@@ -439,7 +446,7 @@ namespace KDTree
         count_within_range(const_reference __V, subvalue_type const __R) const
         {
           if (!_M_get_root()) return 0;
-          _Region_ __region(__V, __R, _M_acc, _M_cmp);
+          _Region_ __region(__K, __V, __R, _M_acc, _M_cmp);
           return this->count_within_range(__region);
         }
 
@@ -459,7 +466,7 @@ namespace KDTree
         visit_within_range(SearchVal const& V, subvalue_type const R, Visitor visitor) const
         {
           if (!_M_get_root()) return visitor;
-          _Region_ region(V, R, _M_acc, _M_cmp);
+          _Region_ region(__K, V, R, _M_acc, _M_cmp);
           return this->visit_within_range(region, visitor);
         }
 
@@ -491,7 +498,7 @@ namespace KDTree
                           _OutputIterator out) const
         {
           if (!_M_get_root()) return out;
-          _Region_ region(val, range, _M_acc, _M_cmp);
+          _Region_ region(__K, val, range, _M_acc, _M_cmp);
           return this->find_within_range(region, out);
         }
 
@@ -1198,11 +1205,12 @@ namespace KDTree
       _Acc _M_acc;
       _Cmp _M_cmp;
       _Dist _M_dist;
+	  size_type __K;
 
 #ifdef KDTREE_DEFINE_OSTREAM_OPERATORS
       friend std::ostream&
       operator<<(std::ostream& o,
-		 KDTree<__K, _Val, _Acc, _Dist, _Cmp, _Alloc> const& tree)
+		 KDTree<_Val, _Acc, _Dist, _Cmp, _Alloc> const& tree)
     {
       o << "meta node:   " << tree._M_header << std::endl;
       o << "root node:   " << tree._M_root << std::endl;
@@ -1213,7 +1221,7 @@ namespace KDTree
       o << "nodes total: " << tree.size() << std::endl;
       o << "dimensions:  " << __K << std::endl;
 
-      typedef KDTree<__K, _Val, _Acc, _Dist, _Cmp, _Alloc> _Tree;
+      typedef KDTree<_Val, _Acc, _Dist, _Cmp, _Alloc> _Tree;
       typedef typename _Tree::_Link_type _Link_type;
 
       std::stack<_Link_const_type> s;
