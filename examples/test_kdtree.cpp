@@ -17,7 +17,7 @@ std::set<const void*> registered;
 
 struct triplet
 {
-  typedef int value_type;
+  typedef double value_type;
 
   triplet(value_type a, value_type b, value_type c)
   {
@@ -64,7 +64,7 @@ struct triplet
 // same as triplet, except with the values reversed.
 struct alternate_triplet
 {
-  typedef int value_type;
+  typedef double value_type;
 
   alternate_triplet(const triplet & x)
   {
