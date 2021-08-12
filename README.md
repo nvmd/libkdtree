@@ -28,6 +28,7 @@ In the past, this library was available from <http://libkdtree.alioth.debian.org
 This page seems to be gone now, available only via WebArchive.
 This is a mirror and a fork of that original repository, created in
 2011 and maintained ever since.
+
 Notes of the original author a preserved below.
 
 Installation
@@ -75,7 +76,7 @@ Thus, to compile with the library,
 #include <kdtree++/kdtree.hpp>
 ```
 
-and append the output of `pkg-config libkdtree++ --cflags` to your $CPPFLAGS.
+and append the output of `pkg-config libkdtree++ --cflags` to your `$CPPFLAGS`.
 
 Each call to `erase()` and `insert()` unbalances the tree.  It is possible that
 nodes will not be found while the tree is unbalanced. You rebalance the
