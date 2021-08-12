@@ -26,7 +26,8 @@ struct triplet
     d[2] = c;
     bool reg_ok = (registered.find(this) == registered.end());
     assert(reg_ok);
-    registered.insert(this).second;
+    bool reg_inserted_ok = registered.insert(this).second;
+    assert(reg_inserted_ok);
   }
 
   triplet(const triplet & x)
@@ -36,7 +37,8 @@ struct triplet
     d[2] = x.d[2];
     bool reg_ok = (registered.find(this) == registered.end());
     assert(reg_ok);
-    registered.insert(this).second;
+    bool reg_inserted_ok = registered.insert(this).second;
+    assert(reg_inserted_ok);
   }
 
   ~triplet()
