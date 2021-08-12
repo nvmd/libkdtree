@@ -228,8 +228,7 @@ int main()
 
   tree_type copied(src);
   std::cout << copied << std::endl;
-  tree_type assigned;
-  assigned = src;
+  tree_type assigned = src;
   std::cout << assigned << std::endl;
 
   for (int loop = 0; loop != 4; ++loop)
