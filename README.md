@@ -7,16 +7,16 @@ sorting, using a kd-tree. It:
   - sports an unlimited number of dimensions (in theory)
   - can store any data structure, access and comparison between the
     individual dimensional components defaults to the bracket operator, in
-    the range [0, k-1] and the std::less functor by default, but other
+    the range `[0, k-1]` and the `std::less` functor by default, but other
     accessors and comparator can be defined.
   - has support for custom allocators
   - implements iterators
   - provides standard find as well as range queries
-  - has amortised O(lg n) time (O(n lg n) worst case) on most
-    operations (insert/erase/find optimised) and worst-case O(n) space.
+  - has amortised `O(lg n)` time (`O(n lg n)` worst case) on most
+    operations (insert/erase/find optimised) and worst-case `O(n)` space.
   - provides a means to rebalance and thus optimise the tree.
   - exists in its own namespace
-  - uses STL coding style, basing a lot of the code on stl_tree.h
+  - uses STL coding style, basing a lot of the code on `stl_tree.h`
 
 Please leave bugreports on Github Issues page <https://github.com/nvmd/libkdtree/issues>.
 
