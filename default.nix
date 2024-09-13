@@ -1,20 +1,19 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ lib
+, stdenv
+, cmake
+, doxygen
+}:
 
-pkgs.stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   name = "libkdtree++";
   # version = "0.7.2";
 
   src = builtins.path { name = "libkdtree++"; path = ./.; };
 
-  nativeBuildInputs = with pkgs; [
+  nativeBuildInputs = [
     cmake
     doxygen
   ];
-
-  configurePhase = ''
-    mkdir -p build && cd build
-    cmake ..
-  '';
 
   buildPhase = ''
     make
@@ -43,4 +42,18 @@ pkgs.stdenv.mkDerivation rec {
     cp -r $src/examples/*.cpp $out/share/doc/libkdtree++/examples
 
   '';
-}
+
+  meta = with lib; {
+    description = "STL-like C++ template container implementatin of a kd-tree.";
+    longDescription = ''
+       STL-like C++ template container implementation of k-dimensional space 
+       sorting, using a kd-tree.
+       It sports a theoretically unlimited number of dimensions, and can store 
+       any data structure.
+       Fork of the project once available from http://libkdtree.alioth.debian.org/
+    '';
+    homepage = "https://github.com/nvmd/libkdtree/";
+    license = licenses.artistic2;
+    platforms = platforms.all;
+  };
+})
