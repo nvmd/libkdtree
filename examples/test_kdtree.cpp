@@ -101,8 +101,11 @@ struct alternate_tac
    double operator()( alternate_triplet const& t, size_t k ) const { return t[k]; }
 };
 
-
-typedef KDTree::KDTree<3, triplet, std::pointer_to_binary_function<triplet,size_t,double> > tree_type;
+#if __cplusplus < 201103L || (defined(_MSC_VER) && _MSC_VER <= 1900)
+    typedef KDTree::KDTree<3, triplet, std::pointer_to_binary_function<triplet, size_t, double> > tree_type;
+#else
+    typedef KDTree::KDTree<3, triplet, std::function<double(triplet, int)> > tree_type;
+#endif
 
 struct Predicate
 {
@@ -122,7 +125,7 @@ int main()
 {
    // check that it'll find nodes exactly MAX away
    {
-      tree_type exact_dist(std::ptr_fun(tac));
+      tree_type exact_dist(std::ref(tac));
         triplet c0(5, 4, 0);
         exact_dist.insert(c0);
         triplet target(7,4,0);
@@ -159,7 +162,7 @@ int main()
 
 
    {
-      tree_type exact_dist(std::ptr_fun(tac));
+      tree_type exact_dist(std::ref(tac));
         triplet c0(5, 2, 0);
         exact_dist.insert(c0);
         triplet target(7,4,0);
@@ -172,7 +175,7 @@ int main()
    }
 
    {
-      tree_type exact_dist(std::ptr_fun(tac));
+      tree_type exact_dist(std::ref(tac));
         triplet c0(5, 2, 0);
         exact_dist.insert(c0);
         triplet target(7,4,0);
@@ -183,7 +186,7 @@ int main()
       assert(found.second == std::sqrt(8));
    }
 
-  tree_type src(std::ptr_fun(tac));
+  tree_type src(std::ref(tac));
 
   triplet c0(5, 4, 0); src.insert(c0);
   triplet c1(4, 2, 1); src.insert(c1);
@@ -382,7 +385,7 @@ int main()
   // Walter reported that the find_within_range() wasn't giving results that were within
   // the specified range... this is the test.
   {
-     tree_type tree(std::ptr_fun(tac));
+     tree_type tree(std::ref(tac));
      tree.insert( triplet(28.771200,16.921600,-2.665970) );
      tree.insert( triplet(28.553101,18.649700,-2.155560) );
      tree.insert( triplet(28.107500,20.341400,-1.188940) );

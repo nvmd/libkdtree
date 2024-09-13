@@ -32,15 +32,22 @@ struct duplet
    value_type d[2];
 };
 
-typedef KDTree::KDTree<2, duplet, std::pointer_to_binary_function<duplet,int,double> > duplet_tree_type;
+#if __cplusplus < 201103L || (defined(_MSC_VER) && _MSC_VER <= 1900)
+typedef KDTree::KDTree<2, duplet, std::pointer_to_binary_function<duplet, int, double> > duplet_tree_type;
+#else
+typedef KDTree::KDTree<2, duplet, std::function<double(duplet, int)> > duplet_tree_type;
+#endif
 
 inline double return_dup( duplet d, int k ) { return d[k]; }
 
-
-
 int main()
 {
-   duplet_tree_type dupl_tree_test(std::ptr_fun(return_dup));
+   #if __cplusplus < 201103L || (defined(_MSC_VER) && _MSC_VER <= 1900)
+       duplet_tree_type dupl_tree_test(std::ptr_fun(return_dup));
+   #else
+       duplet_tree_type dupl_tree_test(std::ref(return_dup));
+       //duplet_tree_type std::function<double(duplet, int)> dupl_tree_test = return_dup;
+   #endif
    std::vector<duplet> vDuplets;
 
    //srand(time(0));
@@ -70,12 +77,8 @@ int main()
 
    dupl_tree_test.optimise();
 
-   size_t elements;
-
    while (vDuplets.size() > 0) //delete all duplets from tree which are in the vector
    {
-      elements = vDuplets.size();
-
       duplet element_to_erase = vDuplets.back();
       vDuplets.pop_back();
 
