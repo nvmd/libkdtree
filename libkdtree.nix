@@ -6,7 +6,7 @@
 
 stdenv.mkDerivation (finalAttrs: {
   name = "libkdtree++";
-  # version = "0.7.2";
+  version = "0.7.3";
 
   src = builtins.path { name = "libkdtree++"; path = ./.; };
 
