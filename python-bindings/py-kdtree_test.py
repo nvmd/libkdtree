@@ -3,9 +3,12 @@
 #
 
 import unittest
+import sys
 
 from kdtree import KDTree_2Int, KDTree_4Int, KDTree_3Float, KDTree_4Float, KDTree_6Float
 
+if sys.version_info.major > 2:
+	long = int
 
 class KDTree_2IntTestCase(unittest.TestCase):
     def test_empty(self):
