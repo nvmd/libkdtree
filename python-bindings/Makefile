@@ -3,6 +3,11 @@ INCLUDE_DIR=..
 CXX=g++
 
 PY_INCLUDE_DIR=$(shell python-config --includes)
+PYTHON_BIN=$(shell \
+	if command -v python >/dev/null 2>&1; then echo python; \
+	elif command -v python3 >/dev/null 2>&1; then echo python3; \
+	else echo "ERROR: Python not found" >&2; exit 1; \
+	fi)
 
 # CPPFLAGS is used by the default rules. Using "override" and "+="
 # allows the user to prepend things to CPPFLAGS on the command line.
@@ -30,7 +35,7 @@ py-kdtree_test: py-kdtree.hpp py-kdtree_test.cpp
 	$(CXX) $(CPPFLAGS) $(LDLIBS) py-kdtree_test.o -o py-kdtree_test
 
 py-kdtree.i: py-kdtree.i.tmpl py-kdtree.hpp.tmpl gen-swig-hpp.py
-	python gen-swig-hpp.py
+	$(PYTHON_BIN) gen-swig-hpp.py
 
 py-kdtree_wrap.cxx: py-kdtree.i py-kdtree.hpp py-kdtree.i.tmpl py-kdtree.hpp.tmpl
 	swig -python -modern -c++ py-kdtree.i
