@@ -183,8 +183,10 @@ def write_swig_file(tmpl_fn_name, swig_fn_name):
     TMPL_BODY = "\n\n".join(TMPL_BODY_LIST)
 
     # write swig file
-    i_content = open(tmpl_fn_name, "r").read()
+    f = open(tmpl_fn_name, "r")
+    i_content = f.read()
     i_content = i_content.replace("%%TMPL_BODY%%", TMPL_BODY).replace("%%TMPL_PY_CLASS_DEF%%", "\n".join(TMPL_PY_CLASS))
+    f.close()
     f=open(swig_fn_name, "w")
     f.write(i_content)
     f.close()
